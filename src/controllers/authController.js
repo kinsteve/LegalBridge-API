@@ -5,7 +5,7 @@ import generateToken from '../config/generateJWT.js';
 
 const register= asyncHandler(async (req,res)=>{
     const {name , email , password , role} = req.body;
-    if(role==="user"){
+
         if(!name || !email || !password || !role){
             res.status(400);
             throw new Error("Please Enter all feilds");
@@ -37,7 +37,6 @@ const register= asyncHandler(async (req,res)=>{
             res.status(400);
             throw new Error("Failed to Create the User")
         }
-    }
 });
 
 const login = asyncHandler(async(req,res)=>{
