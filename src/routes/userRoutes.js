@@ -6,4 +6,4 @@ const userRoutes = Router();
 userRoutes.get('/' ,protect,restrictTo('user','admin'),profile);
 
 
-export default userRoutes;
+export default userRoutes  ;
