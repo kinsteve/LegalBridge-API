@@ -70,6 +70,7 @@ const forgotPassword = asyncHandler( async(req,res)=>{
     const user = await User.findOne({ email });
   
     if (!user) {
+    res.status(401);
       throw new Error('User is not registered with this email.');
     }
   
@@ -89,14 +90,19 @@ const forgotPassword = asyncHandler( async(req,res)=>{
       user.passwordResetToken = undefined;
       user.passwordResetTokenExpires = undefined;
       await user.save({ validateBeforeSave: false });
-  
+      res.status(500)
       throw new Error('There was an error while sending an email');
     }
 })
+
+
+
+
 const resetPassword = asyncHandler(async(req,res)=>{
 const token =  crypto.createHash('sha256').update(req.params.token).digest('hex');
 const user = await User.findOne({passwordResetToken:token,passwordResetTokenExpires:{$gt:Date.now()}});
 if(!user){
+    res.status(400);
     throw new Error('Token is invalid or has expired');
 }
 user.password = req.body.password;
@@ -106,7 +112,7 @@ user.passwordResetTokenExpires=undefined;
 user.passwordChangedAt=Date.now();
 await user.save();
 console.log("updated");
-res.status(200).send("Password has been reseted");
+res.status(200).json({message:"Password has been reseted"});
 
 })
 
