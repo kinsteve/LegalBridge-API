@@ -32,7 +32,8 @@ const register= asyncHandler(async (req,res)=>{
                 password:user.password,
                 pic:user.pic,
                 location:user.location,
-                token: generateToken(user._id)
+                token: generateToken(user._id),
+                message: "User registered Successfully"
             });
         } else {
             res.status(400);
@@ -44,7 +45,7 @@ const login = asyncHandler(async(req,res)=>{
     const {email,password}=req.body;
     const user = await User.findOne({email});
     if(user && (await user.matchPassword(password))){
-        res.json({
+        res.status(200).json({
             _id:user._id,
             role:user.role,
             name:user.name,
@@ -55,7 +56,8 @@ const login = asyncHandler(async(req,res)=>{
             gender:user.gender,
             pic:user.pic,
             location:user.location,
-            token: generateToken(user._id)
+            token: generateToken(user._id),
+            message:"User LoggedIn successfully",
         })
     } else{
         res.status(401);
@@ -76,7 +78,7 @@ const forgotPassword = asyncHandler( async(req,res)=>{
     console.log('Working',resetToken);
   
     await user.save({ validateBeforeSave: false });
-    const resetUrl = `http://localhost:5000/api/v1/users/resetPassword/${resetToken}`;
+    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/users/resetPassword/${resetToken}`;
     const message = `Below is the password reset link ${resetUrl}`;
   
     try {
