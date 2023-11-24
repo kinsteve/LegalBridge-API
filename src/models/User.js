@@ -103,8 +103,11 @@ userSchema.virtual('age').get(function() {
 userSchema.methods.getPasswordResetToken = async function(){
     // Generate a token that expires after 10 minutes
     const resetToken = crypto.randomBytes(32).toString('hex');
+   
     
-    this.passwordResetToken=crypto.createHash('sha256').update(resetToken).digest('hex');
+    // this.passwordResetToken=crypto.createHash('sha256').update(resetToken).digest('hex');
+    this.passwordResetToken=resetToken;
+
     this.passwordResetTokenExpires=Date.now()+10*60*1000;
     console.log(resetToken, this.passwordResetToken );
     return resetToken;

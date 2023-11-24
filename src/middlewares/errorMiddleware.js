@@ -22,10 +22,11 @@ const logger = createLogger({
     });
     
     //A sanitized response to all the errors to hide the sensitive details of the system
-    res.status(statusCode).json({
+    res.status(res.statusCode).json({
         error: {
-            message: 'Internal Server Error',
+            message: err.message,
         },
+
     });
 
 }

@@ -82,7 +82,7 @@ const forgotPassword = asyncHandler( async(req,res)=>{
     try {
         //Sending email,subject and message
       await sendEmail(user.email, "Password reset", message);
-      res.status(200).json(user);
+      res.status(200).json({message : "Reset link sent successfully to the registered mail."});
     } catch (err) {
       user.passwordResetToken = undefined;
       user.passwordResetTokenExpires = undefined;
@@ -92,7 +92,6 @@ const forgotPassword = asyncHandler( async(req,res)=>{
     }
 })
 const resetPassword = asyncHandler(async(req,res)=>{
-// const token = crypto.createHash('sha256').update(req.params.token).digest('hex');
 const token =  crypto.createHash('sha256').update(req.params.token).digest('hex');
 const user = await User.findOne({passwordResetToken:token,passwordResetTokenExpires:{$gt:Date.now()}});
 if(!user){
