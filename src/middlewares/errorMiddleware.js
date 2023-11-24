@@ -32,9 +32,14 @@ const logger = createLogger({
 }
 
 const notFound = (req,res,next)=>{
+  if (req.originalUrl === '/favicon.ico') {
+    // If the request is for favicon, just ignore it and return a 404 status
+    res.status(404).end();
+} else {
     const error = new Error(`Not Found - ${req.originalUrl}`);
     res.status(404);
     next(error);
+}
   };
 
 
