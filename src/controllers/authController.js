@@ -95,9 +95,6 @@ const forgotPassword = asyncHandler( async(req,res)=>{
     }
 })
 
-
-
-
 const resetPassword = asyncHandler(async(req,res)=>{
 const token =  crypto.createHash('sha256').update(req.params.token).digest('hex');
 const user = await User.findOne({passwordResetToken:token,passwordResetTokenExpires:{$gt:Date.now()}});
