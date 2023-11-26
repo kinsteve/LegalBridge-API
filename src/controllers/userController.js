@@ -1,29 +1,34 @@
 import asyncHandler from  'express-async-handler';
+import User from '../models/User.js';
+
 
 const profile = asyncHandler(async(req,res)=>{
 
     const user = req.user; 
     res.status(200).json(user);
 })
-const updateUser = async(req,res)=>{
-    try {
-        const updateDetails = req.body;
-        const user = req.user;
-        console.log(user);
-        if (Object.keys(updateDetails).length === 0 || !updateDetails.password) {
-          return res.status(400).json({ message: "Please provide data to update" });
-        }
-        Object.assign(user, updateDetails);
-        await user.save({ validateBeforeSave: false });
+const updateUserDetails = async (req, res) => {
+    const { id } = req.params; 
+    const updates = req.body; 
     
-        return res.status(200).json({user, message: "User details updated successfully" });
-      } catch (error) {
-        return res.status(500).json({ message:error });
+    try {
+      const updatedUser = await User.findByIdAndUpdate(id, updates, {
+        new: true,
+        runValidators: true, 
+      });
+  
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
       }
-
-}
+      await  updatedUser.save();
+      res.status(200).json({message:"Details are saved successfully!"});
+    } catch (error) {
+      res.status(500).json({ message: 'There is an error while updating the user details' });
+    }
+  };
+  
 
 export {
     profile,
-    updateUser
+    updateUserDetails
 }
