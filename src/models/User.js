@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     email : {
         type:String,
         required: [true,"Email is Required"],
-        unique:true
+        unique:true,
+        match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, 'Please provide a valid email address']
     },
     phone : {
         type: String,
@@ -29,7 +30,13 @@ const userSchema = new mongoose.Schema({
     },
     password:{
         type:String,
-        required:[true,"Password is required"],
+        validate: [
+            {
+              validator: (value) => /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,15}$/.test(value),
+              message: 'Password must contain at least one uppercase letter, one digit, and one special character, and be between 8 to 15 characters long',
+           },
+          ],
+        required:[true,"Password is required"]
     },
     gender:{
         type: String,
@@ -107,7 +114,7 @@ userSchema.methods.getPasswordResetToken = async function(){
     this.passwordResetToken=resetToken;
 
     this.passwordResetTokenExpires=Date.now()+10*60*1000;
-    console.log(resetToken, this.passwordResetToken );
+    // console.log(resetToken, this.passwordResetToken );
     return resetToken;
 
 }

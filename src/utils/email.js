@@ -4,13 +4,15 @@ import nodemailer from 'nodemailer';
 const sendEmail = async (email, subject, text) => {
     try {
         const transporter = nodemailer.createTransport({
-            host: 'sandbox.smtp.mailtrap.io',
-            // service: 'gmail',
-            port: 2525,
+            // host: 'sandbox.smtp.mailtrap.io',
+            service: 'gmail',
+            // port: 2525,
             // secure: true,
             auth: {
-                user: 'adf2c78d349723',
-                pass: '603627a6865b71',
+                // user: 'adf2c78d349723',
+                // pass: '603627a6865b71',
+                user: 'bhatiavikas2001@gmail.com',
+                pass: 'zcwj mqdv acsc znhw',
                 
             },
         });
@@ -29,3 +31,34 @@ const sendEmail = async (email, subject, text) => {
 };
 
 export default sendEmail;
+// import nodemailer from 'nodemailer';
+
+
+// const sendEmail = async (email, subject, text) => {
+//     try {
+//         const transporter = nodemailer.createTransport({
+//             host: 'sandbox.smtp.mailtrap.io',
+//             // service: 'gmail',
+//             port: 2525,
+//             // secure: true,
+//             auth: {
+//                 user: 'adf2c78d349723',
+//                 pass: '603627a6865b71',
+                
+//             },
+//         });
+
+//         await transporter.sendMail({
+//             from: 'support@legalBridge.com',
+//             to: email,
+//             subject: subject,
+//             text: text,
+//         });
+
+//         console.log("email sent sucessfully");
+//     } catch (error) {
+//         console.log("email not sent",error.message);
+//     }
+// };
+
+// export default sendEmail;
