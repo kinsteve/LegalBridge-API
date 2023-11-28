@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         required: [true,"Email is Required"],
         unique:true,
-        match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, 'Please provide a valid email address']
+        match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, 'Please provide a valid email address']
     },
     phone : {
         type: String,
@@ -34,8 +34,8 @@ const userSchema = new mongoose.Schema({
             {
               validator: (value) => /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,15}$/.test(value),
               message: 'Password must contain at least one uppercase letter, one digit, and one special character, and be between 8 to 15 characters long',
-           },
-          ],
+            },
+        ],
         required:[true,"Password is required"]
     },
     gender:{
@@ -110,7 +110,7 @@ userSchema.methods.getPasswordResetToken = async function(){
     const resetToken = crypto.randomBytes(32).toString('hex');
    
     
-    // this.passwordResetToken=crypto.createHash('sha256').update(resetToken).digest('hex');
+    this.passwordResetToken=crypto.createHash('sha256').update(resetToken).digest('hex');
     this.passwordResetToken=resetToken;
 
     this.passwordResetTokenExpires=Date.now()+10*60*1000;

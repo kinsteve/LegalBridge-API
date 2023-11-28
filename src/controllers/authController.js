@@ -79,7 +79,7 @@ const forgotPassword = asyncHandler( async(req,res)=>{
     console.log('Working',resetToken);
   
     await user.save({ validateBeforeSave: false });
-    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/users/resetPassword/${resetToken}`;
+    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${resetToken}`;
     const message = `Below is the password reset link ${resetUrl}`;
   
     try {
