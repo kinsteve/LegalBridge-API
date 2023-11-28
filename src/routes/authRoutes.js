@@ -6,6 +6,12 @@ authRoutes
 .post('/register', register)
 .post('/login' , login)
 .post('/forgotPassword', forgotPassword)
-.patch('/resetPassword/:token', resetPassword);
+.patch('/resetPassword/:token', resetPassword)
+.get('/resetPassword/:token', (req, res) => {
+    res.render('passwordReset'); 
+  })
+.get('/message',(req,res)=>{
+  res.render('message')
+});
 
 export default authRoutes;

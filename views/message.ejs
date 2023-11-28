@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/styles.css"> <!-- Link to your CSS file -->
+    <title>Message Template</title>
+</head>
+<body class="message">
+
+<div class="message-container">
+    <p class="message-text">Password reset successful! You can now close this tab and go to the app.</p>
+</div>
+<script>
+function preventBack() { window.history.forward(); }  
+    setTimeout(preventBack(), 0);  
+    window.onunload = function () { null };
+</script>
+</body>
+</html>
