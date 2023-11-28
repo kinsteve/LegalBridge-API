@@ -85,7 +85,7 @@ const forgotPassword = asyncHandler( async(req,res)=>{
     try {
         //Sending email,subject and message
       await sendEmail(user.email, "Password reset", message);
-      res.status(200).json({message : "Reset link sent successfully to the registered mail."});
+      res.status(200).json({message : "Reset link sent successfully to your registered mail."});
     } catch (err) {
       user.passwordResetToken = undefined;
       user.passwordResetTokenExpires = undefined;
