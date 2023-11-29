@@ -11,8 +11,8 @@ const sendEmail = async (email, subject, text) => {
             auth: {
                 // user: 'adf2c78d349723',
                 // pass: '603627a6865b71',
-                user: 'bhatiavikas2001@gmail.com',
-                pass: 'zcwj mqdv acsc znhw',
+                user: process.env.GMAIL,
+                pass: process.env.MAIL_PASS,
                 
             },
         });
