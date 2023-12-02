@@ -1,8 +1,9 @@
 import { Router } from "express";
-import {register,login, forgotPassword, resetPassword} from '../controllers/authController.js'
+import {register,login, forgotPassword, resetPassword, emailCheck} from '../controllers/authController.js'
 const authRoutes = Router();
 
 authRoutes
+.post('/emailCheck', emailCheck)
 .post('/register', register)
 .post('/login' , login)
 .post('/forgotPassword', forgotPassword)

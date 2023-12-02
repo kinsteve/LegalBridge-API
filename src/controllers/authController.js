@@ -32,6 +32,7 @@ const register= asyncHandler(async (req,res)=>{
                 password:user.password,
                 pic:user.pic,
                 location:user.location,
+                address:user.address,
                 token: generateToken(user._id),
                 message: "User registered Successfully"
             });
@@ -40,6 +41,30 @@ const register= asyncHandler(async (req,res)=>{
             throw new Error("Failed to Create the User")
         }
 });
+
+const emailCheck = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    // Regex pattern to check the email format
+    const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+
+    if (!emailRegex.test(email)) {
+        // If the provided email does not match the regex pattern
+        res.status(400);
+        throw new Error("Invalid Email format");
+    }
+
+    const user = await User.findOne({ email });
+    if (user) {
+        // If the email is associated with another account
+        res.status(400);
+        throw new Error("This Email is associated with another account.");
+    } else {
+        // If the email is valid and not associated with any account
+        res.status(200).json({ message: "Valid Email" });
+    }
+});
+
 
 const login = asyncHandler(async(req,res)=>{
     const {email,password}=req.body;
@@ -56,6 +81,7 @@ const login = asyncHandler(async(req,res)=>{
             gender:user.gender,
             pic:user.pic,
             location:user.location,
+            address:user.address,
             token: generateToken(user._id),
             message:"User LoggedIn successfully",
         })
@@ -118,5 +144,6 @@ export {
     register,
     login,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    emailCheck
 };
