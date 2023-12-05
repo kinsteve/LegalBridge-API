@@ -1,5 +1,8 @@
 import dotenv from 'dotenv';
-dotenv.config();
+const result = dotenv.config();
+if (result.error) {
+    console.error(result.error);
+}
 import express from 'express';
 import 'colors';
 import authRoutes from './routes/authRoutes.js';

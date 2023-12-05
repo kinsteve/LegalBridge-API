@@ -89,4 +89,8 @@ derivedDataPath
 #enviornment files
 .env
 
+#Documentation
+documentaion
+
 # End of https://www.gitignore.io/api/node
+

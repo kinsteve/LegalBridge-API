@@ -48,6 +48,13 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: [true, "Phone Number is Required"],
+      validate: {
+        validator: function(value) {
+        //this checks if it's a 10-digit number
+          return /^\d{10}$/.test(value);
+        },
+        message: 'Invalid phone number format'
+      }
     },
     dob: {
       type: Date,

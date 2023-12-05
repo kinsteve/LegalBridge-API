@@ -2,7 +2,10 @@ import User from '../models/User.js';
 import asyncHandler from 'express-async-handler';
 import generateToken from '../config/generateJWT.js';
 import sendEmail from '../utils/email.js';
-import crypto from 'crypto';
+import twilio from 'twilio';
+import generateOTP from '../config/generateOTP.js';
+import otpModel from '../models/OtpSchema.js';
+
 
 const register= asyncHandler(async (req,res)=>{
     const {name , email , password , role} = req.body;
@@ -140,10 +143,74 @@ res.status(200).json({message:"Password has been reseted"});
 
 })
 
+//PHONE NUMBER VERIFICATION
+
+const sendOTP = asyncHandler(async(req,res)=>{
+    const accountSid = process.env.ACCOUNT_SID;
+    const authToken = process.env.AUTH_TOKEN;
+    const client = twilio(accountSid, authToken);
+    
+    const {phoneNumber} = req.body;
+    const otp = generateOTP().toString();
+    const expirationTime  = new Date(); 
+    expirationTime.setMinutes(expirationTime.getMinutes()+5);          // 5 minutes in milliseconds
+    // console.log(expirationTime);
+    const otpDocument = new otpModel({
+        phoneNumber,
+        otp,
+        expirationTime
+    })
+    await otpDocument.save();
+
+    await client.messages
+    .create({
+        body: `Your LegalBridge verification code is: ${otp}. This code will expire in 5 minutes.`,
+        from:process.env.TWILIO_NUMBER,
+        to: phoneNumber
+    })
+    .then(()=>{
+        res.status(200).json({message : "OTP send Successfully."});
+    })
+    .catch((err)=>{
+         res.status(500);
+         console.error(err);
+         throw new Error(`Failed to send OTP`);
+    })
+
+});
+
+const verifyOTP = asyncHandler(async(req,res)=>{
+    const {phoneNumber , userOTP} = req.body;
+    
+    try {
+        const otpDocument = await otpModel.findOne({
+            phoneNumber , 
+            expirationTime: {$gt:new Date()}
+        }).sort({expirationTime : -1});
+
+         if(otpDocument && otpDocument.otp === userOTP){
+            res.status(200)
+            .json({message : "OTP verified Successfully"});
+         }else{
+            res.status(400);
+            throw new Error("Invalid OTP");
+         }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500);
+        throw new Error("Error Verifying the OTP");
+    }
+});
+
+
+
 export {
     register,
     login,
     forgotPassword,
     resetPassword,
-    emailCheck
+    emailCheck,
+    sendOTP,
+    verifyOTP
 };
