@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Email is Required"],
       unique: true,
+      lowercase:true,
       match: [
         /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
         "Please provide a valid email address",
@@ -87,7 +88,7 @@ const userSchema = new mongoose.Schema(
     pic: {
       type: String,
       default:
-        "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+        "https://res.cloudinary.com/dmeer8vir/image/upload/v1700830965/roqfusjibr7xrzu4ygve.png",
     },
     address: UserAddressSchema,
 

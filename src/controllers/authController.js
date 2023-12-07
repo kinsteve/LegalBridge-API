@@ -9,40 +9,34 @@ import otpModel from '../models/OtpSchema.js';
 
 const register= asyncHandler(async (req,res)=>{
     const {name , email , password , role} = req.body;
-
-        if(!name || !email || !password || !role){
-            res.status(400);
-            throw new Error("Please Enter all feilds");
+        try {
+            const user= await User.create(req.body);
+            if(user){
+                res.status(201).json({
+                    _id:user._id,
+                    role:user.role,
+                    name:user.name,
+                    email:user.email,
+                    phone:user.phone,
+                    dob: user.dob,
+                    age: user.age,
+                    gender:user.gender,
+                    password:user.password,
+                    pic:user.pic,
+                    location:user.location,
+                    address:user.address,
+                    token: generateToken(user._id),
+                    message: "User registered Successfully"
+                });
+            } else {
+                res.status(400);
+                throw new Error("Failed to Create the User")
+            }
+        } catch (error) {
+                res.status(400);
+               throw new Error(error.message);
         }
-        const userExists = await User.exists({email:email});
-
-        if(userExists){
-            res.status(400);
-            throw new Error("User already exists");
-        }
-
-        const user= await User.create(req.body);
-        if(user){
-            res.status(201).json({
-                _id:user._id,
-                role:user.role,
-                name:user.name,
-                email:user.email,
-                phone:user.phone,
-                dob: user.dob,
-                age: user.age,
-                gender:user.gender,
-                password:user.password,
-                pic:user.pic,
-                location:user.location,
-                address:user.address,
-                token: generateToken(user._id),
-                message: "User registered Successfully"
-            });
-        } else {
-            res.status(400);
-            throw new Error("Failed to Create the User")
-        }
+       
 });
 
 const emailCheck = asyncHandler(async (req, res) => {
@@ -189,6 +183,7 @@ const verifyOTP = asyncHandler(async(req,res)=>{
         }).sort({expirationTime : -1});
 
          if(otpDocument && otpDocument.otp === userOTP){
+            await otpDocument.remove();
             res.status(200)
             .json({message : "OTP verified Successfully"});
          }else{
