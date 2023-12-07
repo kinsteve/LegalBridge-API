@@ -183,7 +183,7 @@ const verifyOTP = asyncHandler(async(req,res)=>{
         }).sort({expirationTime : -1});
 
          if(otpDocument && otpDocument.otp === userOTP){
-            await otpDocument.remove();
+            await otpDocument.deleteOne();
             res.status(200)
             .json({message : "OTP verified Successfully"});
          }else{
