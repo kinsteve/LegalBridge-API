@@ -24,7 +24,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
         throw new Error("User not Found");
       }
 
-      res.status(200).json({updatedUser , message:"Details are saved successfully!"});
+      res.status(200).json({...updatedUser._doc, message:"Details are saved successfully!"});
     } catch (error) {
       res.status(500);
       console.log(error);
