@@ -7,6 +7,7 @@ import express from 'express';
 import 'colors';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import lspRoutes from './routes/lspRoutes.js';
 import connectDB from './config/db.js';
 import {notFound , errorHandler} from  './middlewares/errorMiddleware.js'; 
 
@@ -22,6 +23,7 @@ app.get('/test',(req,res)=>{
 
 app.use('/api/v1/auth',authRoutes);
 app.use('/api/v1/user' , userRoutes);
+app.use('/api/v1/lsp',lspRoutes);
 app.use(errorHandler);
 app.use(notFound);
 
