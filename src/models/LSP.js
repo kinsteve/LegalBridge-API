@@ -105,11 +105,11 @@ const LSPSchema = new mongoose.Schema({
     },
     experience: {
         type: Number,
-        required: [true , "Eperience is Required"]
+        required: [true , "Experience is Required"]
     },
     expertiseField: {
         type: [String],
-        required: [true,"Feild of Expertise is required"]
+        required: [true,"Field of Expertise is required"]
     },
     courts: {
         type: [String]
