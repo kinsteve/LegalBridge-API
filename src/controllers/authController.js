@@ -1,16 +1,16 @@
-import User from '../models/User.js';
+import UserModel from '../models/User.js';
 import asyncHandler from 'express-async-handler';
 import generateToken from '../config/generateJWT.js';
 import sendEmail from '../utils/email.js';
 import twilio from 'twilio';
 import generateOTP from '../config/generateOTP.js';
 import otpModel from '../models/OtpSchema.js';
+import LSPModel from '../models/LSP.js';
 
 
-const register= asyncHandler(async (req,res)=>{
-    const {name , email , password , role} = req.body;
+const registerUser= asyncHandler(async (req,res)=>{
         try {
-            const user= await User.create(req.body);
+            const user= await UserModel.create(req.body);
             if(user){
                 res.status(201).json({
                     _id:user._id,
@@ -38,8 +38,44 @@ const register= asyncHandler(async (req,res)=>{
         }
        
 });
+const registerLSP= asyncHandler(async (req,res)=>{
+        try {
+            const lsp= await LSPModel.create(req.body);
+            if(lsp){
+                res.status(201).json({
+                    _id:lsp._id,
+                    name:lsp.name,
+                    email:lsp.email,
+                    phone:lsp.phone,
+                    dob: lsp.dob,
+                    password:lsp.password,
+                    age: lsp.age,
+                    gender:lsp.gender,
+                    pic:lsp.pic,
+                    barID:lsp.barID,
+                    role:lsp.role,
+                    typeOfLSP:lsp.typeOfLSP,
+                    experience:lsp.experience,
+                    expertiseFeild:lsp.expertiseField,
+                    courts:lsp.courts,
+                    rating:lsp.rating,
+                    location:lsp.location,
+                    education:lsp.education,
+                    token: generateToken(lsp._id),
+                    message: "LSP registered Successfully"
+                });
+            } else {
+                res.status(400);
+                throw new Error("Failed to Create the LSP")
+            }
+        } catch (error) {
+                res.status(400);
+               throw new Error(error.message);
+        }
+       
+});
 
-const emailCheck = asyncHandler(async (req, res) => {
+const emailCheck = (Model) => asyncHandler(async (req, res) => {
     const { email } = req.body;
 
     // Regex pattern to check the email format
@@ -51,8 +87,8 @@ const emailCheck = asyncHandler(async (req, res) => {
         throw new Error("Invalid Email format");
     }
 
-    const user = await User.findOne({ email });
-    if (user) {
+    const targetUser = await Model.findOne({ email });
+    if (targetUser) {
         // If the email is associated with another account
         res.status(400);
         throw new Error("This Email is associated with another account.");
@@ -62,10 +98,9 @@ const emailCheck = asyncHandler(async (req, res) => {
     }
 });
 
-
-const login = asyncHandler(async(req,res)=>{
+const loginUser = asyncHandler(async(req,res)=>{
     const {email,password}=req.body;
-    const user = await User.findOne({email});
+    const user = await UserModel.findOne({email});
     if(user && (await user.matchPassword(password))){
         res.status(200).json({
             _id:user._id,
@@ -87,55 +122,92 @@ const login = asyncHandler(async(req,res)=>{
         throw new Error("Invalid Email or Password");
     }
 });
+const loginLSP = asyncHandler(async(req,res)=>{
+    const {email,password}=req.body;
+    const lsp = await LSPModel.findOne({email});
+    if(lsp && (await lsp.matchPassword(password))){
+        res.status(200).json({
+            _id:lsp._id,
+            name:lsp.name,
+            email:lsp.email,
+            phone:lsp.phone,
+            dob: lsp.dob,
+            password:lsp.password,
+            age: lsp.age,
+            gender:lsp.gender,
+            pic:lsp.pic,
+            barID:lsp.barID,
+            role:lsp.role,
+            typeOfLSP:lsp.typeOfLSP,
+            experience:lsp.experience,
+            expertiseFeild:lsp.expertiseField,
+            courts:lsp.courts,
+            rating:lsp.rating,
+            location:lsp.location,
+            education:lsp.education,
+            token: generateToken(lsp._id),
+            message: "LSP Loggedin Successfully"
+        })
+    } else{
+        res.status(401);
+        throw new Error("Invalid Email or Password");
+    }
+});
 
-const forgotPassword = asyncHandler( async(req,res)=>{
+const forgotPassword = (Model) => asyncHandler(async (req, res) => {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const targetUser = await Model.findOne({ email });
   
-    if (!user) {
-    res.status(401);
+    if (!targetUser) {
+      res.status(401);
       throw new Error('User is not registered with this email.');
     }
   
     // generate a random reset token and save it in the database
-    const resetToken = await user.getPasswordResetToken();
-    console.log('Working',resetToken);
+    const resetToken = await targetUser.getPasswordResetToken();
+    console.log('Working', resetToken);
   
-    await user.save({ validateBeforeSave: false });
+    await targetUser.save({ validateBeforeSave: false });
     const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${resetToken}`;
     const message = `Below is the password reset link ${resetUrl}`;
   
     try {
-        //Sending email,subject and message
-      await sendEmail(user.email, "Password reset", message);
-      res.status(200).json({message : "Reset link sent successfully to your registered mail."});
+      //Sending email,subject and message
+      await sendEmail(targetUser.email, "Password reset", message);
+      res.status(200).json({ message: "Reset link sent successfully to your registered mail." });
     } catch (err) {
-      user.passwordResetToken = undefined;
-      user.passwordResetTokenExpires = undefined;
-      await user.save({ validateBeforeSave: false });
+      targetUser.passwordResetToken = undefined;
+      targetUser.passwordResetTokenExpires = undefined;
+      await targetUser.save({ validateBeforeSave: false });
       res.status(500)
       throw new Error('There was an error while sending an email');
     }
-})
+  });
 
-const resetPassword = asyncHandler(async(req,res)=>{
-// const token =  crypto.createHash('sha256').update(req.params.token).digest('hex');
-const token = req.params.token;
-const user = await User.findOne({passwordResetToken:token,passwordResetTokenExpires:{$gt:Date.now()}});
-if(!user){
-    res.status(400);
-    throw new Error('Token is invalid or has expired');
-}
-user.password = req.body.password;
-user.confirmPassword = req.body.confirmPassword;
-user.passwordResetToken=undefined;
-user.passwordResetTokenExpires=undefined;
-user.passwordChangedAt=Date.now();
-await user.save();
-console.log("updated");
-res.status(200).json({message:"Password has been reseted"});
-
-})
+const resetPassword = (Model) => asyncHandler(async (req, res) => {
+    const token = req.params.token;
+  
+    // Replace 'User' with the specified model dynamically
+    const targetUser = await Model.findOne({
+      passwordResetToken: token,
+      passwordResetTokenExpires: { $gt: Date.now() },
+    });
+  
+    if (!targetUser) {
+      res.status(400);
+      throw new Error('Token is invalid or has expired');
+    }
+  
+    targetUser.password = req.body.password;
+    targetUser.confirmPassword = req.body.confirmPassword;
+    targetUser.passwordResetToken = undefined;
+    targetUser.passwordResetTokenExpires = undefined;
+    targetUser.passwordChangedAt = Date.now();
+    await targetUser.save();
+  
+    console.log('Password has been reseted');
+    res.status(200).json({ message: 'Password has been reseted' });
+  });
 
 //PHONE NUMBER VERIFICATION
 
@@ -201,8 +273,10 @@ const verifyOTP = asyncHandler(async(req,res)=>{
 
 
 export {
-    register,
-    login,
+    registerUser,
+    registerLSP,
+    loginUser,
+    loginLSP,
     forgotPassword,
     resetPassword,
     emailCheck,
