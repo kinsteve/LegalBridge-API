@@ -105,11 +105,11 @@ const LSPSchema = new mongoose.Schema({
     },
     experience: {
         type: Number,
-        required: [true , "Eperience is Required"]
+        required: [true , "Experience is Required"]
     },
     expertiseField: {
         type: [String],
-        required: [true,"Feild of Expertise is required"]
+        required: [true,"Field of Expertise is required"]
     },
     courts: {
         type: [String]
@@ -123,6 +123,17 @@ const LSPSchema = new mongoose.Schema({
           message: 'Rating must be between 0 and 5',
         },
         default: 0, // You can set a default value if needed
+      },
+      isActive:{
+            type:Boolean,
+            default:true,
+      },
+      bio:{
+        type:String,
+
+      },
+      languages:{
+        type:[String],
       },
     location: LSPAddressSchema,
     education: [LSPEducationSchema],
