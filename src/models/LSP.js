@@ -124,6 +124,17 @@ const LSPSchema = new mongoose.Schema({
         },
         default: 0, // You can set a default value if needed
       },
+      isActive:{
+            type:Boolean,
+            default:true,
+      },
+      bio:{
+        type:String,
+
+      },
+      languages:{
+        type:[String],
+      },
     location: LSPAddressSchema,
     education: [LSPEducationSchema],
     // Other fields specific to LSP registration
