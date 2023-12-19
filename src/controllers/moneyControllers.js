@@ -1,5 +1,5 @@
 
-import { WalletModel, TransactionModel } from "../models/MoneyModel";
+import { WalletModel, TransactionModel } from "../models/MoneyModel.js";
 import asyncHandler from "express-async-handler";
 
 //---------------------Wallet Controllers------------------------------
@@ -196,5 +196,6 @@ const createTrans = asyncHandler( async (req, res) => {
     createWallet,
     updateWallet,
     deleteWallet,
-    getAllTrans
+    getAllTrans,
+    getAllSlugTrans
   }

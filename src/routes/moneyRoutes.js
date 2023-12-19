@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import {protect,restrictTo} from '../middlewares/authMiddleware.js';
-
+import { createTrans, createWallet, deleteTrans, deleteWallet, getAllSlugTrans, getAllTrans, getAllWallets, updateWallet } from '../controllers/moneyControllers.js';
 const moneyRouter = Router();
 
 moneyRouter

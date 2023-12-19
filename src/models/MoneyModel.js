@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
-import uuid from 'uuid';
+import 'uuid';
 
 const walletSchema = new mongoose.Schema({
     name: 
