@@ -25,7 +25,7 @@ app.get('/test',(req,res)=>{
 app.use('/api/v1/auth',authRoutes);
 app.use('/api/v1/user' , userRoutes);
 app.use('/api/v1/lsp',lspRoutes);
-app.use('/api/money',moneyRoutes);
+app.use('/api/v1/money',moneyRoutes);
 app.use(errorHandler);
 app.use(notFound);
 

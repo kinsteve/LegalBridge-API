@@ -46,6 +46,17 @@ const userSchema = new mongoose.Schema(
         "Please provide a valid email address",
       ],
     },
+    voterId:{
+      type: String,
+      required:[true,'VoterID is Required'],
+      unique:true,
+      validate:{
+        validator: function(value){
+              return/^[A-Z]{3}[0-9]{7}$/.test(value);
+        },
+        message: ' Invalid VoterId Format'
+      }
+    },
     phone: {
       type: String,
       required: [true, "Phone Number is Required"],

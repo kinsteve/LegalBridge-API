@@ -16,24 +16,25 @@ const getAllWallets = asyncHandler( async(req,res)=>{
 
 const createWallet = asyncHandler(async (req, res) => {
   const { name } = req.body;
-
+   console.log(req.user);
   try {
     // Checking if the name is already in use
-    const existingWallet = await WalletModel.findOne({ name });
+    const existingWallet = await WalletModel.findOne({name});
 
     if (existingWallet) {
-      return res.status(400).json({ success: false, message: 'Wallet name already exists' });
+       res.status(400)
+       throw new Error('Wallet name already exists');
     }
 
     // Create a new wallet
-    const wallet = await WalletModel.create({ name });
+    const wallet = await WalletModel.create({ name , user: req.user });
 
     // Send success response upon successful creation
     res.status(201).json({ success: true, data: wallet });
   } catch (error) {
     // Handle other errors
     res.status(500)
-    throw new Error("Internal Server Error", error.message);
+    throw new Error(error.message);
   }
 });
 

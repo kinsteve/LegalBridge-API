@@ -8,7 +8,7 @@ import otpModel from '../models/OtpSchema.js';
 import LSPModel from '../models/LSP.js';
 
 
-const registerUser= asyncHandler(async (req,res)=>{
+const registerUser= asyncHandler(async (req,res,next)=>{
         try {
             const user= await UserModel.create(req.body);
             if(user){
@@ -17,6 +17,7 @@ const registerUser= asyncHandler(async (req,res)=>{
                     role:user.role,
                     name:user.name,
                     email:user.email,
+                    voterId: user.voterId,
                     phone:user.phone,
                     dob: user.dob,
                     age: user.age,
@@ -29,16 +30,16 @@ const registerUser= asyncHandler(async (req,res)=>{
                     message: "User registered Successfully"
                 });
             } else {
-                res.status(400);
-                throw new Error("Failed to Create the User")
+                const error = new Error("Failed to Create the User");
+                error.statusCode = 400; 
+                throw error;
             }
         } catch (error) {
-                res.status(500);
-               throw new Error(error.message);
+               return next(error);
         }
        
 });
-const registerLSP= asyncHandler(async (req,res)=>{
+const registerLSP= asyncHandler(async (req,res,next)=>{
         try {
             const lsp= await LSPModel.create(req.body);
             if(lsp){
@@ -65,21 +66,22 @@ const registerLSP= asyncHandler(async (req,res)=>{
                     message: "LSP registered Successfully"
                 });
             } else {
-                res.status(400);
-                throw new Error("Failed to Create the LSP")
+                const error = new Error("Failed to Create the LSP");
+                error.statusCode = 400; 
+                throw error;
             }
         } catch (error) {
-                res.status(500);
-               throw new Error(error.message);
+               return next(error);
         }
        
 });
 
-const emailCheck = (Model) => asyncHandler(async (req, res) => {
+const emailCheck = (Model) => asyncHandler(async (req, res,next) => {
     const { email } = req.body;
 
     // Regex pattern to check the email format
     const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+    
 
     if (!emailRegex.test(email)) {
         // If the provided email does not match the regex pattern
@@ -180,7 +182,7 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
     console.log('Working', resetToken);
   
     await targetUser.save({ validateBeforeSave: false });
-    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${resetToken}`;
+    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/user/${resetToken}`;
     const message = `Below is the password reset link ${resetUrl}`;
   
     try {
