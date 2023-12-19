@@ -55,8 +55,8 @@ const userSchema = new mongoose.Schema(
               return /^[A-Z]{3}[0-9]{7}$/.test(value);
         },
         message: ' Invalid VoterId Format'
-      }
-    },
+       }
+     },
     phone: {
       type: String,
       required: [true, "Phone Number is Required"],

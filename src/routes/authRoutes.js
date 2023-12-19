@@ -16,7 +16,7 @@ authRoutes
 .post('/forgotPassword/lsp', forgotPassword(LSPModel))
 .patch('/resetPassword/user/:token', resetPassword(UserModel))
 .patch('/resetPassword/lsp/:token', resetPassword(LSPModel))
-.get('/resetPassword/:token', (req, res) => {
+.get('/resetPassword/user/:token', (req, res) => {
     res.render('passwordReset'); 
   })
   .get('/message',(req,res)=>{

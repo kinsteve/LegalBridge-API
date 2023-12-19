@@ -8,75 +8,73 @@ import otpModel from '../models/OtpSchema.js';
 import LSPModel from '../models/LSP.js';
 
 
-const registerUser = asyncHandler(async (req, res) => {
-    try {
-        const user = await UserModel.create(req.body);
-        if (user) {
-            res.status(201).json({
-                _id: user._id,
-                role: user.role,
-                name: user.name,
-                email: user.email,
-                voterId: user.voterId,
-                phone: user.phone,
-                dob: user.dob,
-                age: user.age,
-                gender: user.gender,
-                password: user.password,
-                pic: user.pic,
-                location: user.location,
-                address: user.address,
-                token: generateToken(user._id),
-                message: "User registered Successfully"
-            });
-        } else {
-            res.status(400);
-            throw new Error("Failed to Create the User")
+const registerUser= asyncHandler(async (req,res,next)=>{
+        try {
+            const user= await UserModel.create(req.body);
+            if(user){
+                res.status(201).json({
+                    _id:user._id,
+                    role:user.role,
+                    name:user.name,
+                    email:user.email,
+                    voterId: user.voterId,
+                    phone:user.phone,
+                    dob: user.dob,
+                    age: user.age,
+                    gender:user.gender,
+                    password:user.password,
+                    pic:user.pic,
+                    location:user.location,
+                    address:user.address,
+                    token: generateToken(user._id),
+                    message: "User registered Successfully"
+                });
+            } else {
+                const error = new Error("Failed to Create the User");
+                error.statusCode = 400; 
+                throw error;
+            }
+        } catch (error) {
+               return next(error);
         }
-    } catch (error) {
-        res.status(400);
-        throw new Error(error.message);
-    }
 
 });
-const registerLSP = asyncHandler(async (req, res) => {
-    try {
-        console.log("Running RegisterLSP");
-        const lsp = await LSPModel.create(req.body);
-        if (lsp) {
-            res.status(201).json({
-                _id: lsp._id,
-                name: lsp.name,
-                email: lsp.email,
-                phone: lsp.phone,
-                dob: lsp.dob,
-                password: lsp.password,
-                age: lsp.age,
-                gender: lsp.gender,
-                pic: lsp.pic,
-                barID: lsp.barID,
-                role: lsp.role,
-                typeOfLSP: lsp.typeOfLSP,
-                experience: lsp.experience,
-                expertiseFeild: lsp.expertiseField,
-                courts: lsp.courts,
-                rating: lsp.rating,
-                location: lsp.location,
-                education: lsp.education,
-                startTime: lsp.startTime,
-                endTime: lsp.endTime,
-                token: generateToken(lsp._id),
-                message: "LSP registered Successfully"
-            });
-        } else {
-            res.status(400);
-            throw new Error("Failed to Create the LSP")
-        }
-    } catch (error) {
-        res.status(400);
-        throw new Error(error.message);
-    }
 
+
+const registerLSP= asyncHandler(async (req,res,next)=>{
+        try {
+            const lsp= await LSPModel.create(req.body);
+            if(lsp){
+                res.status(201).json({
+                    _id:lsp._id,
+                    name:lsp.name,
+                    email:lsp.email,
+                    phone:lsp.phone,
+                    dob: lsp.dob,
+                    password:lsp.password,
+                    age: lsp.age,
+                    gender:lsp.gender,
+                    pic:lsp.pic,
+                    barID:lsp.barID,
+                    role:lsp.role,
+                    typeOfLSP:lsp.typeOfLSP,
+                    experience:lsp.experience,
+                    expertiseFeild:lsp.expertiseField,
+                    courts:lsp.courts,
+                    rating:lsp.rating,
+                    location:lsp.location,
+                    education:lsp.education,
+                    token: generateToken(lsp._id),
+                    message: "LSP registered Successfully"
+                });
+            } else {
+                const error = new Error("Failed to Create the LSP");
+                error.statusCode = 400; 
+                throw error;
+            }
+        } catch (error) {
+               return next(error);
+        }
 });
 
 const emailCheck = (Model) => asyncHandler(async (req, res) => {
@@ -90,11 +88,7 @@ const emailCheck = (Model) => asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error("Invalid Email format");
     }
-    if (!voterRegex.test(voterId)) {
-        // If the provided email does not match the regex pattern
-        res.status(400);
-        throw new Error("Invalid voterId format");
-    }
+
     // const targetUser = await Model.findOne({ email });
 
     // if (targetUser) {
@@ -187,7 +181,7 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
     console.log('Working', resetToken);
 
     await targetUser.save({ validateBeforeSave: false });
-    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${resetToken}`;
+    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/user/${resetToken}`;
     const message = `Below is the password reset link ${resetUrl}`;
 
     try {

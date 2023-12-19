@@ -20,6 +20,11 @@ const walletSchema = new mongoose.Schema({
         type: Number, 
         default: 0 
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'UserModel', 
+      unique: true, // Ensures one wallet per user
+    },
 });
 
 walletSchema.pre('save', function (next) {
