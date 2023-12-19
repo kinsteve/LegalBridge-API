@@ -3,27 +3,33 @@ import { WalletModel, TransactionModel } from "../models/MoneyModel.js";
 import asyncHandler from "express-async-handler";
 
 //---------------------Wallet Controllers------------------------------
-const getAllWallets = asyncHandler( async(req,res)=>{
-      const wallets = await WalletModel.find();
-      if(!wallets){
-        res.status(400)
-        throw new Error("No wallet found");
-      }
-      else{
-        res.status(200).json(wallets);
-      }
+const getAllWallets = asyncHandler( async(req,res,next)=>{
+  try {
+    const wallets = await WalletModel.find();
+        if(!wallets){
+          const error = new Error("No wallet found");
+          error.statusCode = 400; 
+          throw error;
+        }
+        else{
+          res.status(200).json(wallets);
+        }
+  } catch (error) {
+    return next(error);
+  }   
 })
 
-const createWallet = asyncHandler(async (req, res) => {
+const createWallet = asyncHandler(async (req, res,next) => {
   const { name } = req.body;
-   console.log(req.user);
+  
   try {
     // Checking if the name is already in use
     const existingWallet = await WalletModel.findOne({name});
 
     if (existingWallet) {
-       res.status(400)
-       throw new Error('Wallet name already exists');
+      const error = new Error('Wallet name already exists');
+      error.statusCode = 400; 
+      throw error;
     }
 
     // Create a new wallet
@@ -33,20 +39,20 @@ const createWallet = asyncHandler(async (req, res) => {
     res.status(201).json({ success: true, data: wallet });
   } catch (error) {
     // Handle other errors
-    res.status(500)
-    throw new Error(error.message);
+    return next(error);
   }
 });
 
-const updateWallet = asyncHandler(async (req, res) => {
+const updateWallet = asyncHandler(async (req, res,next) => {
   const { slug } = req.params;
 
   try {
     const wallet = await WalletModel.findOne({ slug });
 
     if (!wallet) {
-      res.status(404)
-      throw new Error('Wallet not found');
+      const error = new Error('Wallet not found');
+      error.statusCode = 404; 
+      throw error;
     }
 
     wallet.name = req.body.name; 
@@ -55,26 +61,25 @@ const updateWallet = asyncHandler(async (req, res) => {
 
     return res.status(200).json({ success: true, message: 'Wallet updated successfully', data: wallet });
   } catch (error) {
-    res.status(500);
-    throw new Error('Internal server error',error.message);
+    return next(error);
   }
 });
 
-const deleteWallet = asyncHandler(async (req, res) => {
+const deleteWallet = asyncHandler(async (req, res,next) => {
   const { slug } = req.params;
 
   try {
     const wallet = await WalletModel.findOneAndDelete({ slug });
 
     if (!wallet) {
-      res.status(404)
-      throw new Error('Wallet not found');
+      const error = new Error('Wallet not found');
+      error.statusCode = 404; 
+      throw error;
     }
 
     return res.status(200).json({ success: true, message: 'Wallet deleted successfully' });
   } catch (error) {
-      res.status(500)
-      throw new Error('Internal server error',error);
+      return next(error);
   }
 })
 
@@ -92,13 +97,15 @@ const deleteWallet = asyncHandler(async (req, res) => {
 
 
 //-------------------------Transaction Controllers-----------------------------------
-const createTrans = asyncHandler( async (req, res) => {
+const createTrans = asyncHandler( async (req, res,next) => {
     const { walletId, transaction_type, amount } = req.body;
     
     try {
       const existingWallet = await WalletModel.findById(walletId);
       if (!existingWallet) {
-        return res.status(404).json({ success: false, message: 'Wallet not found' });
+        const error = new Error('Wallet not found');
+        error.statusCode = 404; 
+        throw error;
       }
   
       let success = false;
@@ -115,53 +122,55 @@ const createTrans = asyncHandler( async (req, res) => {
       if (success) {
         return res.status(200).json({ success: true, message: 'Transaction provided successfully' });
       } else {
-        return res.status(400).json({ success: false, message: 'Failed to provide transaction' });
+        const error = new Error('Failed to provide transaction');
+        error.statusCode = 404; 
+        throw error;
       }
     } catch (error) {
-      res.status(500)
-      throw new Error('Internal server error',error.message);
+      return next(error);
     }
   });
 
-  const getAllTrans = asyncHandler(async (req, res) => {
+  const getAllTrans = asyncHandler(async (req, res,next) => {
     try {
       const transactions = await TransactionModel.find(); 
   
       return res.status(200).json({ success: true, data: transactions });
     } catch (error) {
-       res.status(500)
-       throw new Error('Internal server error',error.message);
+      return next(error);
     }
   });
 
-  const getAllSlugTrans = asyncHandler(async (req, res) => {
+  const getAllSlugTrans = asyncHandler(async (req, res,next) => {
     const walletSlug = req.params.slug;
   
     try {
       const wallet = await WalletModel.findOne({ slug: walletSlug });
   
       if (!wallet) {
-        res.status(404)
-        throw new Error('Wallet not found');
+        const error = new Error('Wallet Not Found');
+        error.statusCode = 404; 
+        throw error;
       }
   
       const transactions = await TransactionModel.find({ wallet: wallet._id });
   
       return res.status(200).json({ success: true, data: transactions });
     } catch (error) {
-      res.status(500)
-      throw new Error('Internal server error',error);
+      return next(error);
     }
   });
   
 
-  const deleteTrans = asyncHandler(async (req, res) => {
+  const deleteTrans = asyncHandler(async (req, res,next) => {
     try {
       const { transactionId } = req.params;
       const transaction = await TransactionModel.findById(transactionId);
   
       if (!transaction) {
-        return res.status(404).json({ message: 'Transaction not found' });
+        const error = new Error('Transaction not Found');
+        error.statusCode = 404; 
+        throw error;
       }
   
       const isPossible = await transaction.isDeletionPossible(); // Using instance method
@@ -181,12 +190,7 @@ const createTrans = asyncHandler( async (req, res) => {
   
       return res.status(200).json({ message: 'Transaction deleted successfully' });
     } catch (error) {
-      if (error.message === 'Deletion is not possible') {
-        res.status(400);
-        throw new Error(error.message);
-      }
-      res.status(500);
-       throw new Error('Internal server error' );
+       return next(error);
     }
   });
 
