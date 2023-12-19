@@ -14,7 +14,7 @@ const logger = createLogger({
 
   const errorHandler = (err , req,res,next)=>{
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode ; 
-
+    console.log(res.statusCode);
     logger.error({
         statusCode,
         message: err.message,
