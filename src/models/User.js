@@ -22,12 +22,17 @@ const UserAddressSchema = new mongoose.Schema({
       message: (props) => `${props.value} is not a valid 6-digit pincode!`,
     },
   },
-  coordinates: {
+  geoLocation:{
     type: {
-      lat: Number,
-      long: Number,
+      type: String,
+      enum: ['Point'], // This specifies that the type should be a Point
+      required: true
     },
-  },
+    coordinates: {
+      type: [Number], // Specifies an array of numbers for the coordinates [longitude, latitude]
+      required: true
+    }
+  }
 });
 
 const userSchema = new mongoose.Schema(

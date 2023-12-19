@@ -21,13 +21,19 @@ const LSPAddressSchema = new mongoose.Schema({
       },
       message: (props) => `${props.value} is not a valid 6-digit pincode!`,
     }
+  }
+});
+
+const geoLocationSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ['Point'], // This specifies that the type should be a Point
+    required: true
   },
   coordinates: {
-    type: {
-      lat: Number,
-      long: Number,
-    },
-  },
+    type: [Number], // Specifies an array of numbers for the coordinates [longitude, latitude]
+    required: true
+  }
 });
 
 const LSPEducationSchema = new mongoose.Schema({
@@ -101,6 +107,7 @@ const LSPSchema = new mongoose.Schema({
   },
   barID: {
     type: String,
+    unique:true,
     required: [true, "BarID is required"]
   },
   role: {
@@ -144,7 +151,13 @@ const LSPSchema = new mongoose.Schema({
   languages: {
     type: [String],
   },
-  location: LSPAddressSchema,
+  location: {
+    type: LSPAddressSchema,
+  },
+  geoLocation:{
+    type: geoLocationSchema,
+    index:'2dsphere'
+  },
   education: [LSPEducationSchema],
   startTime: {
     type: Date,

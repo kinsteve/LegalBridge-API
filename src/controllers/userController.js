@@ -85,8 +85,31 @@ const updateUserDetails = asyncHandler(async (req, res) => {
   })
   
 
+  const findNearestLSPsToUser = asyncHandler(async(req,res,next)=>{
+    const { clientCoordinates } = req.body;
+    try {
+      const nearestLSPs = await LSP.find({
+        geoLocation: {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: clientCoordinates
+            },
+            $maxDistance: 1500000 // Adjust max distance as needed
+          }
+        }
+      });
+  
+      // Send the nearestLSPs as a response
+      return res.status(200).json({ nearestLSPs });
+    } catch (error) {
+      return next(error);
+    }
+  })
+
 export {
     profile,
     updateUserDetails,
-    bookingSlot
+    bookingSlot,
+    findNearestLSPsToUser
 }

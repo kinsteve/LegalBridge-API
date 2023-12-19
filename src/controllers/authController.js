@@ -6,12 +6,15 @@ import twilio from 'twilio';
 import generateOTP from '../config/generateOTP.js';
 import otpModel from '../models/OtpSchema.js';
 import LSPModel from '../models/LSP.js';
+import { createWalletController } from './moneyControllers.js';
 
 
 const registerUser= asyncHandler(async (req,res,next)=>{
         try {
             const user= await UserModel.create(req.body);
             if(user){
+                // const walletCreationResponse = await createWalletController(req, res, next,user);
+                // console.log(walletCreationResponse);
                 res.status(201).json({
                     _id:user._id,
                     role:user.role,
@@ -25,11 +28,12 @@ const registerUser= asyncHandler(async (req,res,next)=>{
                     password:user.password,
                     pic:user.pic,
                     location:user.location,
+                    geoLocation:user.geoLocation,
                     address:user.address,
                     token: generateToken(user._id),
                     message: "User registered Successfully"
                 });
-
+                
             } else {
                 const error = new Error("Failed to Create the User");
                 error.statusCode = 400; 
@@ -64,6 +68,7 @@ const registerLSP = asyncHandler(async (req,res,next)=>{
                     courts:lsp.courts,
                     rating:lsp.rating,
                     location:lsp.location,
+                    geoLocation:user.geoLocation,
                     education:lsp.education,
                     token: generateToken(lsp._id),
                     message: "LSP registered Successfully"

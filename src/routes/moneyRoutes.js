@@ -1,11 +1,11 @@
 import {Router} from 'express';
 import {protect,restrictTo} from '../middlewares/authMiddleware.js';
-import { createTrans, createWallet, deleteTrans, deleteWallet, getAllSlugTrans, getAllTrans, getAllWallets, updateWallet } from '../controllers/moneyControllers.js';
+import { createTrans, createWalletController, deleteTrans, deleteWallet, getAllSlugTrans, getAllTrans, getAllWallets, updateWallet } from '../controllers/moneyControllers.js';
 const moneyRouter = Router();
 
 moneyRouter
 .get('/wallets' , protect , restrictTo("admin") , getAllWallets)
-.post('/wallets' , protect , createWallet)
+.post('/wallets' , protect , createWalletController)
 .put('/wallets/:slug', protect , updateWallet)
 .delete('/wallets/:slug', protect , deleteWallet)
 //transactions

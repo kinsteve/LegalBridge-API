@@ -19,29 +19,42 @@ const getAllWallets = asyncHandler( async(req,res,next)=>{
   }   
 })
 
-const createWallet = asyncHandler(async (req, res,next) => {
-  const { name } = req.body;
-  
+const createWallet = async (user) => {
+  const { name } = user;
+
   try {
     // Checking if the name is already in use
-    const existingWallet = await WalletModel.findOne({name});
+    const existingWallet = await WalletModel.findOne({ name });
 
     if (existingWallet) {
       const error = new Error('Wallet name already exists');
-      error.statusCode = 400; 
+      error.statusCode = 400;
       throw error;
     }
 
     // Create a new wallet
-    const wallet = await WalletModel.create({ name , user: req.user });
+    const wallet = await WalletModel.create({ name, user });
+
+    // Return the created wallet
+    return wallet;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Assuming you use asyncHandler middleware to handle async operations in Express.js
+const createWalletController = asyncHandler(async (req, res, next,user) => {
+  try {
+    const wallet = await createWallet(user);
 
     // Send success response upon successful creation
     res.status(201).json({ success: true, data: wallet });
   } catch (error) {
-    // Handle other errors
+    // Handle errors
     return next(error);
   }
 });
+  
 
 const updateWallet = asyncHandler(async (req, res,next) => {
   const { slug } = req.params;
@@ -198,7 +211,7 @@ const createTrans = asyncHandler( async (req, res,next) => {
     createTrans,
     deleteTrans,
     getAllWallets,
-    createWallet,
+    createWalletController,
     updateWallet,
     deleteWallet,
     getAllTrans,
