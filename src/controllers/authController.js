@@ -29,11 +29,13 @@ const registerUser= asyncHandler(async (req,res,next)=>{
                     token: generateToken(user._id),
                     message: "User registered Successfully"
                 });
+
             } else {
                 const error = new Error("Failed to Create the User");
                 error.statusCode = 400; 
                 throw error;
             }
+           
         } catch (error) {
                return next(error);
         }
