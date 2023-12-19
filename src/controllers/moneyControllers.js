@@ -5,13 +5,19 @@ import asyncHandler from "express-async-handler";
 //---------------------Wallet Controllers------------------------------
 const getAllWallets = asyncHandler( async(req,res)=>{
       const wallets = await WalletModel.find();
-      if(!wallets){
-        res.status(400)
-        throw new Error("No wallet found");
+      try{
+        if(!wallets){
+          const error =  new Error("No wallet found");
+          error.statusCode=404;
+          throw error;
+         }
+         else{
+           res.status(200).json(wallets);
+         }
+      }catch(error){
+        return next(error);
       }
-      else{
-        res.status(200).json(wallets);
-      }
+   
 })
 
 const createWallet = asyncHandler(async (req, res) => {
@@ -22,8 +28,9 @@ const createWallet = asyncHandler(async (req, res) => {
     const existingWallet = await WalletModel.findOne({name});
 
     if (existingWallet) {
-       res.status(400)
-       throw new Error('Wallet name already exists');
+      const error =  new Error("Wallet name already exists");
+      error.statusCode=400;
+      throw error;
     }
 
     // Create a new wallet
