@@ -94,7 +94,16 @@ const emailCheck = (Model) => asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error("Invalid voterId format");
     }
+    // const targetUser = await Model.findOne({ email });
 
+    // if (targetUser) {
+    //     // If the email is associated with another account
+    //     res.status(400);
+    //     throw new Error("This Email is associated with another account.");
+    // } else {
+    //     // If the email is valid and not associated with any account
+    //     res.status(200).json({ message: "Valid Email" });
+    // }
     const targetUserByEmail = await Model.findOne({ email });
     const targetUserByVoterId = await Model.findOne({ voterId });
 
