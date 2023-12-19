@@ -87,7 +87,11 @@ const emailCheck = (Model) => asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error("Invalid Email format");
     }
-
+    if (!voterRegex.test(voterId)) {
+        // If the provided email does not match the regex pattern
+        res.status(400);
+        throw new Error("Invalid voterId format");
+    }
     // const targetUser = await Model.findOne({ email });
 
     // if (targetUser) {
