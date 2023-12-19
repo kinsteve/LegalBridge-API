@@ -8,6 +8,7 @@ import 'colors';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import lspRoutes from './routes/lspRoutes.js';
+import moneyRoutes from './routes/moneyRoutes.js';
 import connectDB from './config/db.js';
 import {notFound , errorHandler} from  './middlewares/errorMiddleware.js'; 
 
