@@ -37,11 +37,10 @@ const registerUser= asyncHandler(async (req,res,next)=>{
         } catch (error) {
                return next(error);
         }
-
 });
 
 
-const registerLSP= asyncHandler(async (req,res,next)=>{
+const registerLSP = asyncHandler(async (req,res,next)=>{
         try {
             const lsp= await LSPModel.create(req.body);
             if(lsp){
