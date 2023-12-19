@@ -13,3 +13,5 @@ moneyRouter
 .get('/transactions/:slug' , protect, getAllSlugTrans)
 .delete('/transaction/:id', protect , deleteTrans)
 .post('/transactions',protect,createTrans);
+
+export default moneyRouter;
