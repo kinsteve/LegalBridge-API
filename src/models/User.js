@@ -52,11 +52,11 @@ const userSchema = new mongoose.Schema(
       unique:true,
       validate:{
         validator: function(value){
-              return/^[A-Z]{3}[0-9]{7}$/.test(value);
+              return /^[A-Z]{3}[0-9]{7}$/.test(value);
         },
         message: ' Invalid VoterId Format'
-      }
-    },
+       }
+     },
     phone: {
       type: String,
       required: [true, "Phone Number is Required"],
@@ -106,6 +106,7 @@ const userSchema = new mongoose.Schema(
       // required:[true,'Confirm Password is required'],
       validate: [validateConfirmPassword, "Passwords are not same"],
     },
+    
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpires: Date,
@@ -128,6 +129,16 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified) {
     // pre means before
     next();
+  }
+  const existingUser = await UserModel.findOne({
+    $or: [{ email: this.email }, { voterId: this.voterId }],
+  });
+
+  if (existingUser) {
+    const field = existingUser.email === this.email ? "Email" : "VoterId";
+    const message = `${field} is already registered.`;
+    const error = new Error(message);
+    return next(error);
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
