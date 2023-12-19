@@ -33,7 +33,7 @@ const registerUser= asyncHandler(async (req,res)=>{
                 throw new Error("Failed to Create the User")
             }
         } catch (error) {
-                res.status(400);
+                res.status(500);
                throw new Error(error.message);
         }
        
@@ -69,7 +69,7 @@ const registerLSP= asyncHandler(async (req,res)=>{
                 throw new Error("Failed to Create the LSP")
             }
         } catch (error) {
-                res.status(400);
+                res.status(500);
                throw new Error(error.message);
         }
        
@@ -100,7 +100,8 @@ const emailCheck = (Model) => asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async(req,res)=>{
     const {email,password}=req.body;
-    const user = await UserModel.findOne({email});
+    try {
+        const user = await UserModel.findOne({email});
     if(user && (await user.matchPassword(password))){
         res.status(200).json({
             _id:user._id,
@@ -118,13 +119,19 @@ const loginUser = asyncHandler(async(req,res)=>{
             message:"User LoggedIn successfully",
         })
     } else{
-        res.status(401);
+        res.status(401)
         throw new Error("Invalid Email or Password");
     }
+    } catch (error) {
+        res.status(500)
+        throw new Error(error.message);
+    }
+    
 });
 const loginLSP = asyncHandler(async(req,res)=>{
     const {email,password}=req.body;
-    const lsp = await LSPModel.findOne({email});
+    try {
+        const lsp = await LSPModel.findOne({email});
     if(lsp && (await lsp.matchPassword(password))){
         res.status(200).json({
             _id:lsp._id,
@@ -152,6 +159,11 @@ const loginLSP = asyncHandler(async(req,res)=>{
         res.status(401);
         throw new Error("Invalid Email or Password");
     }
+    } catch (error) {
+        res.status(500)
+        throw new Error(error.message);
+    }
+    
 });
 
 const forgotPassword = (Model) => asyncHandler(async (req, res) => {
@@ -180,7 +192,7 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
       targetUser.passwordResetTokenExpires = undefined;
       await targetUser.save({ validateBeforeSave: false });
       res.status(500)
-      throw new Error('There was an error while sending an email');
+      throw new Error('There was an error while sending an email' , err.message);
     }
   });
 
@@ -188,25 +200,30 @@ const resetPassword = (Model) => asyncHandler(async (req, res) => {
     const token = req.params.token;
   
     // Replace 'User' with the specified model dynamically
-    const targetUser = await Model.findOne({
-      passwordResetToken: token,
-      passwordResetTokenExpires: { $gt: Date.now() },
-    });
-  
-    if (!targetUser) {
-      res.status(400);
-      throw new Error('Token is invalid or has expired');
+    try {
+        const targetUser = await Model.findOne({
+          passwordResetToken: token,
+          passwordResetTokenExpires: { $gt: Date.now() },
+        });
+      
+        if (!targetUser) {
+          res.status(400);
+          throw new Error('Token is invalid or has expired');
+        }
+      
+        targetUser.password = req.body.password;
+        targetUser.confirmPassword = req.body.confirmPassword;
+        targetUser.passwordResetToken = undefined;
+        targetUser.passwordResetTokenExpires = undefined;
+        targetUser.passwordChangedAt = Date.now();
+        await targetUser.save();
+      
+        console.log('Password has been reseted');
+        res.status(200).json({ message: 'Password has been reseted' });
+    } catch (error) {
+        res.status(500)
+        throw new Error(error.message)
     }
-  
-    targetUser.password = req.body.password;
-    targetUser.confirmPassword = req.body.confirmPassword;
-    targetUser.passwordResetToken = undefined;
-    targetUser.passwordResetTokenExpires = undefined;
-    targetUser.passwordChangedAt = Date.now();
-    await targetUser.save();
-  
-    console.log('Password has been reseted');
-    res.status(200).json({ message: 'Password has been reseted' });
   });
 
 //PHONE NUMBER VERIFICATION
@@ -239,8 +256,7 @@ const sendOTP = asyncHandler(async(req,res)=>{
     })
     .catch((err)=>{
          res.status(500);
-         console.error(err);
-         throw new Error(`Failed to send OTP`);
+         throw new Error(`Failed to send OTP`,err.message);
     })
 
 });
@@ -264,9 +280,8 @@ const verifyOTP = asyncHandler(async(req,res)=>{
          }
 
     } catch (error) {
-        console.error(error);
         res.status(500);
-        throw new Error("Error Verifying the OTP");
+        throw new Error("Error Verifying the OTP",error.message);
     }
 });
 
