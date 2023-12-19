@@ -80,8 +80,8 @@ const registerLSP = asyncHandler(async (req, res) => {
 });
 
 const emailCheck = (Model) => asyncHandler(async (req, res) => {
-    const { email } = req.body;
-    console.log("object");
+    const { email,voterId } = req.body;
+    const voterRegex =  /^[A-Z]{3}[0-9]{7}$/;
     // Regex pattern to check the email format
     const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
 
@@ -90,7 +90,11 @@ const emailCheck = (Model) => asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error("Invalid Email format");
     }
-
+    if (!voterRegex.test(voterId)) {
+        // If the provided email does not match the regex pattern
+        res.status(400);
+        throw new Error("Invalid voterId format");
+    }
     // const targetUser = await Model.findOne({ email });
 
     // if (targetUser) {
