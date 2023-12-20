@@ -48,24 +48,24 @@ const getAllDetails = asyncHandler( async (req, res) => {
     }
   });
 
-  const insertAllLSPs = asyncHandler( async(req,res,next)=>{
-    try {
-      const __dirname = path.dirname(fileURLToPath(import.meta.url));
-      const filePath = path.join(__dirname, '../../lspData.json');
-      const rawData = fs.readFileSync(filePath);
+  // const insertAllLSPs = asyncHandler( async(req,res,next)=>{
+  //   try {
+  //     const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  //     const filePath = path.join(__dirname, '../../lspData.json');
+  //     const rawData = fs.readFileSync(filePath);
     
-    // Parse the JSON data
-    const lspsData = JSON.parse(rawData);
-    const collection = LSPModel.collection;
+  //   // Parse the JSON data
+  //   const lspsData = JSON.parse(rawData);
+  //   const collection = LSPModel.collection;
 
-    // Bypass Mongoose and use native MongoDB driver to insert data
-    await collection.insertMany(lspsData);
-      // await LSPModel.insertMany(lspsData, { validateBeforeSave: false });
-      res.status(200).json('LSP data inserted successfully');
-  } catch (err) {
-      return next(err);
-  } 
-  })
+  //   // Bypass Mongoose and use native MongoDB driver to insert data
+  //   await collection.insertMany(lspsData);
+  //     // await LSPModel.insertMany(lspsData, { validateBeforeSave: false });
+  //     res.status(200).json('LSP data inserted successfully');
+  // } catch (err) {
+  //     return next(err);
+  // } 
+  // })
 
   export {
        getAllDetails,
