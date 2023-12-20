@@ -95,7 +95,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
               type: 'Point',
               coordinates: clientCoordinates
             },
-            $maxDistance: 1500000 // Adjust max distance as needed
+            $maxDistance: 500000 // Adjust max distance as needed
           }
         }
       });
@@ -105,7 +105,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
     } catch (error) {
       return next(error);
     }
-  })
+})
 
 export {
     profile,

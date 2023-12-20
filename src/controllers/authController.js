@@ -189,14 +189,23 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
     // generate a random reset token and save it in the database
     const resetToken = await targetUser.getPasswordResetToken();
     console.log('Working', resetToken);
-
+    
+    targetUser.passwordReset = true,
     await targetUser.save({ validateBeforeSave: false });
-    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/user/${resetToken}`;
+
+    let current = '';
+    if(Model === UserModel){
+        current = 'user';
+    }
+    else{
+        current = 'lsp';
+    }
+    const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${current}/${resetToken}`;
     const message = `Below is the password reset link ${resetUrl}`;
 
     try {
         //Sending email,subject and message
-        await sendEmail(targetUser.email, "Password reset", message);
+        await sendEmail(targetUser.email, "Password Reset", message);
         res.status(200).json({ message: "Reset link sent successfully to your registered mail." });
     } catch (err) {
         targetUser.passwordResetToken = undefined;

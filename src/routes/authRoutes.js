@@ -19,7 +19,10 @@ authRoutes
 .get('/resetPassword/user/:token', (req, res) => {
     res.render('passwordReset'); 
   })
-  .get('/message',(req,res)=>{
+.get('/resetPassword/lsp/:token', (req, res) => {
+    res.render('passwordReset'); 
+  })
+.get('/message',(req,res)=>{
     res.render('message')
   })
 .post('/sendOTP',sendOTP)

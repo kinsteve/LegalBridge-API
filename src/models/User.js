@@ -21,17 +21,18 @@ const UserAddressSchema = new mongoose.Schema({
       },
       message: (props) => `${props.value} is not a valid 6-digit pincode!`,
     },
+  }
+});
+
+const geoLocationSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ['Point'], // This specifies that the type should be a Point
+    required: true
   },
-  geoLocation:{
-    type: {
-      type: String,
-      enum: ['Point'], // This specifies that the type should be a Point
-      required: true
-    },
-    coordinates: {
-      type: [Number], // Specifies an array of numbers for the coordinates [longitude, latitude]
-      required: true
-    }
+  coordinates: {
+    type: [Number], // Specifies an array of numbers for the coordinates [longitude, latitude]
+    required: true
   }
 });
 
@@ -105,7 +106,7 @@ const userSchema = new mongoose.Schema(
         "https://res.cloudinary.com/dmeer8vir/image/upload/v1700830965/roqfusjibr7xrzu4ygve.png",
     },
     address: UserAddressSchema,
-
+    geoLocation: geoLocationSchema,
     confirmPassword: {
       type: String,
       // required:[true,'Confirm Password is required'],
@@ -115,6 +116,10 @@ const userSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpires: Date,
+    passwordReset: {
+      type:Boolean ,
+      default:false
+    }
   },
   { timestamps: true }
 );
@@ -131,7 +136,7 @@ function validateConfirmPassword(cfrm) {
 
 userSchema.pre("save", async function (next) {
   //hashing the password before saving it to database
-  if (!this.isModified) {
+  if (!this.isModified || this.passwordReset) {
     // pre means before
     next();
   }
@@ -172,10 +177,10 @@ userSchema.methods.getPasswordResetToken = async function () {
   // Generate a token that expires after 10 minutes
   const resetToken = crypto.randomBytes(32).toString("hex");
 
-  this.passwordResetToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
+  // this.passwordResetToken = crypto
+  //   .createHash("sha256")
+  //   .update(resetToken)
+  //   .digest("hex");
   this.passwordResetToken = resetToken;
 
   this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000;
