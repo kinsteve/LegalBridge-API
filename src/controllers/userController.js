@@ -101,7 +101,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
       });
   
       // Send the nearestLSPs as a response
-      return res.status(200).json({ nearestLSPs });
+      return res.status(200).json(nearestLSPs);
     } catch (error) {
       return next(error);
     }
