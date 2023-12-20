@@ -60,7 +60,7 @@ const LSPSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Email is Required"],
-    // unique: true,
+    unique: true,
     lowercase: true,
     match: [
       /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
@@ -107,7 +107,7 @@ const LSPSchema = new mongoose.Schema({
   },
   barID: {
     type: String,
-    // unique:true,
+    unique:true,
     required: [true, "BarID is required"]
   },
   role: {
