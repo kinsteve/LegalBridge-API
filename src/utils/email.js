@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 
-const sendEmail = async (email, subject, text) => {
+const sendEmail = async (email, subject, html) => {
     try {
         const transporter = nodemailer.createTransport({
             // host: 'sandbox.smtp.mailtrap.io',
@@ -21,7 +21,7 @@ const sendEmail = async (email, subject, text) => {
             from: 'support@legalBridge.com',
             to: email,
             subject: subject,
-            text: text,
+            html: html,
         });
 
         console.log("email sent sucessfully");

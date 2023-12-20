@@ -201,7 +201,88 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
         current = 'lsp';
     }
     const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${current}/${resetToken}`;
-    const message = `Below is the password reset link ${resetUrl}`;
+    // const message = `Below is the password reset link ${resetUrl}`;
+    const message = 
+    `<!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Reset</title>
+        <style>
+            /* CSS styles */
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+            }
+    
+            .container {
+                width: 80%;
+                margin: auto;
+                overflow: hidden;
+            }
+    
+            header {
+                background: #fff;
+                color: #333;
+                padding: 20px 10px;
+                text-align: center;
+                box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            }
+    
+            .logo {
+                max-width: 150px;
+                margin: 0 auto;
+                display: block;
+            }
+    
+            .content {
+                background: #fff;
+                padding: 20px;
+                margin-top: 20px;
+                border-radius: 5px;
+            }
+    
+            p {
+                margin-bottom: 15px;
+            }
+    
+            .reset-link {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <header>
+            <div class="container">
+                <img class="logo" src="https://legal-bridge-api.onrender.com/images/logo.png" alt="Your Logo">
+            </div>
+        </header>
+        <div class="container">
+            <div class="content">
+                <h2>Password Reset</h2>
+                <p>Dear User,</p>
+                <p>We have received a request to reset your password. Click the button below to reset it:</p>
+                <a href="${resetUrl}"
+                    class="reset-link">Reset Password</a>
+                <p>If you didn't request this, you can safely ignore this email.</p>
+                <p>Thank you!</p>
+            </div>
+        </div>
+    </body>
+    
+    </html>
+    `;
 
     try {
         //Sending email,subject and message
