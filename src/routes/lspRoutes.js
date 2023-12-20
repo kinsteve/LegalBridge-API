@@ -1,8 +1,13 @@
 import {Router} from 'express';
 import {protect,restrictTo} from '../middlewares/authMiddleware.js';
-import { getAllDetails } from '../controllers/lspControllers.js';
+import { getAllDetails, getLSPByName, insertAllLSPs } from '../controllers/lspControllers.js';
 const lspRoutes = Router();
 
-lspRoutes.get('/',protect,getAllDetails);
+
+
+lspRoutes
+.get('/',protect,getAllDetails)
+.post('/getLSPByName' ,protect, getLSPByName)
+.get('/insertAllLSPs', protect, insertAllLSPs)
 
 export default lspRoutes;
