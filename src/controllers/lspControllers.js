@@ -69,6 +69,5 @@ const getAllDetails = asyncHandler( async (req, res) => {
 
   export {
        getAllDetails,
-       getLSPByName,
-       insertAllLSPs
+       getLSPByName
   }
