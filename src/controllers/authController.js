@@ -83,47 +83,46 @@ const registerLSP = asyncHandler(async (req,res,next)=>{
         }
 });
 
-const emailCheck = (Model) => asyncHandler(async (req, res) => {
+const emailCheck = (Model) => asyncHandler(async (req, res,next) => {
     const { email,voterId } = req.body;
     const voterRegex =  /^[A-Z]{3}[0-9]{7}$/;
     // Regex pattern to check the email format
     const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-
-    if (!emailRegex.test(email)) {
-        // If the provided email does not match the regex pattern
-        res.status(400);
-        throw new Error("Invalid Email format");
+    try{
+        if (!emailRegex.test(email)) {
+            // If the provided email does not match the regex pattern
+            const error = new Error("Invalid Email format");
+            error.statusCode = 400;
+            throw(error);
+        }
+        if (!voterRegex.test(voterId)) {
+            // If the provided email does not match the regex pattern
+            const error = new Error("Invalid voterId format");
+            error.statusCode = 400;
+            throw(error);
+        }
+        const targetUserByEmail = await Model.findOne({ email });
+        const targetUserByVoterId = await Model.findOne({ voterId });
+    
+        if (targetUserByEmail || targetUserByVoterId) {
+            const error = new Error("This Email/VoterID is associated with another account.");
+            error.statusCode = 400;
+            throw(error);
+        } else {
+            res.status(200).json({ message: "Both Email and VoterId are unique."});
+        }
+    }catch(error){
+       return next(error);
     }
-    if (!voterRegex.test(voterId)) {
-        // If the provided email does not match the regex pattern
-        res.status(400);
-        throw new Error("Invalid voterId format");
-    }
-    // const targetUser = await Model.findOne({ email });
-
-    // if (targetUser) {
-    //     // If the email is associated with another account
-    //     res.status(400);
-    //     throw new Error("This Email is associated with another account.");
-    // } else {
-    //     // If the email is valid and not associated with any account
-    //     res.status(200).json({ message: "Valid Email" });
-    // }
-    const targetUserByEmail = await Model.findOne({ email });
-    const targetUserByVoterId = await Model.findOne({ voterId });
-
-    if (targetUserByEmail || targetUserByVoterId) {
-        res.status(400);
-        throw new Error("This Email/VoterID is associated with another account.");
-    } else {
-        res.status(200).json({ message: "Both Email and VoterId are unique."});
-    }
+    
 });
 
-const loginUser = asyncHandler(async (req, res) => {
+const loginUser = asyncHandler(async (req, res,next) => {
     const { voterId, password } = req.body;
-    const user = await UserModel.findOne({ voterId });
-    if (user && (await user.matchPassword(password))) {
+    try{
+        const user = await UserModel.findOne({ voterId });
+        console.log(user);
+        if (user && (await user.matchPassword(password))) {
         res.status(200).json({
             _id: user._id,
             role: user.role,
@@ -141,14 +140,19 @@ const loginUser = asyncHandler(async (req, res) => {
             message: "User LoggedIn successfully",
         })
     } else {
-        res.status(401);
-        throw new Error("Invalid VoterId or Password");
+        const error = new Error("Invalid VoterId or Password");
+        error.statusCode = 401;
+        throw(error);
+    }
+    }catch(error){
+        return next(error);
     }
 });
-const loginLSP = asyncHandler(async (req, res) => {
+const loginLSP = asyncHandler(async (req, res,next) => {
     const { email, password } = req.body;
-    const lsp = await LSPModel.findOne({ email });
-    if (lsp && (await lsp.matchPassword(password))) {
+    try{
+        const lsp = await LSPModel.findOne({ email });
+        if (lsp && (await lsp.matchPassword(password))) {
         res.status(200).json({
             _id: lsp._id,
             name: lsp.name,
@@ -172,8 +176,13 @@ const loginLSP = asyncHandler(async (req, res) => {
             message: "LSP Loggedin Successfully"
         })
     } else {
-        res.status(401);
-        throw new Error("Invalid Email or Password");
+        const error = new Error("Invalid Email or Password");
+        error.statusCode = 401;
+        throw(error);
+    }
+    }
+    catch(error){
+        return next(error);
     }
 });
 
@@ -201,7 +210,7 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
         current = 'lsp';
     }
     const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${current}/${resetToken}`;
-    // const message = `Below is the password reset link ${resetUrl}`;
+    // const message = Below is the password reset link ${resetUrl};
     const message = 
     `<!DOCTYPE html>
     <html lang="en">
@@ -294,37 +303,45 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
         await targetUser.save({ validateBeforeSave: false });
         res.status(500)
         throw new Error('There was an error while sending an email');
-    }
+    }
 });
 
-const resetPassword = (Model) => asyncHandler(async (req, res) => {
+const resetPassword = (Model) => asyncHandler(async (req, res,next) => {
     const token = req.params.token;
 
     // Replace 'User' with the specified model dynamically
-    const targetUser = await Model.findOne({
-        passwordResetToken: token,
-        passwordResetTokenExpires: { $gt: Date.now() },
-    });
-
-    if (!targetUser) {
-        res.status(400);
-        throw new Error('Token is invalid or has expired');
+    try{
+        const targetUser = await Model.findOne({
+            passwordResetToken: token,
+            passwordResetTokenExpires: { $gt: Date.now() },
+        });
+    
+        if (!targetUser) {
+            const error = new Error('Token is invalid or has expired');
+            res.statusCode = 400;
+            throw(error);
+        }
+        console.log(targetUser);
+        targetUser.password = req.body.password;
+        targetUser.confirmPassword = req.body.confirmPassword;
+        targetUser.passwordResetToken = undefined;
+        targetUser.passwordResetTokenExpires = undefined;
+        targetUser.passwordChangedAt = Date.now();
+        await targetUser.save();
+        console.log(targetUser);
+    
+        console.log('Password has been reseted');
+        res.status(200).json({ message: 'Password has been reseted' });
     }
-
-    targetUser.password = req.body.password;
-    targetUser.confirmPassword = req.body.confirmPassword;
-    targetUser.passwordResetToken = undefined;
-    targetUser.passwordResetTokenExpires = undefined;
-    targetUser.passwordChangedAt = Date.now();
-    await targetUser.save();
-
-    console.log('Password has been reseted');
-    res.status(200).json({ message: 'Password has been reseted' });
+    catch(error){
+        return next(error);
+    }
+ 
 });
 
 //PHONE NUMBER VERIFICATION
 
-const sendOTP = asyncHandler(async (req, res) => {
+const sendOTP = asyncHandler(async (req, res,next) => {
     const accountSid = process.env.ACCOUNT_SID;
     const authToken = process.env.AUTH_TOKEN;
     const client = twilio(accountSid, authToken);
@@ -340,8 +357,8 @@ const sendOTP = asyncHandler(async (req, res) => {
         expirationTime
     })
     await otpDocument.save();
-
-    await client.messages
+    try{
+        await client.messages
         .create({
             body: `Your LegalBridge verification code is: ${otp}. This code will expire in 5 minutes.`,
             from: process.env.TWILIO_NUMBER,
@@ -351,14 +368,20 @@ const sendOTP = asyncHandler(async (req, res) => {
             res.status(200).json({ message: "OTP send Successfully." });
         })
         .catch((err) => {
-            res.status(500);
-            console.error(err);
-            throw new Error(`Failed to send OTP`);
+            console.log(err);
+            const error = new Error('Failed to send OTP');
+            res.statusCode= 500;
+            throw error;
         })
+    }
+    catch(error){
+        return next(error);
+    }
+    
 
 });
 
-const verifyOTP = asyncHandler(async (req, res) => {
+const verifyOTP = asyncHandler(async (req, res,next) => {
     const { phoneNumber, userOTP } = req.body;
 
     try {
@@ -372,14 +395,13 @@ const verifyOTP = asyncHandler(async (req, res) => {
             res.status(200)
                 .json({ message: "OTP verified Successfully" });
         } else {
-            res.status(400);
-            throw new Error("Invalid OTP");
+            const error = new Error('Invalid OTP');
+            error.statusCode = 400;
+            throw error;
         }
 
     } catch (error) {
-        console.error(error);
-        res.status(500);
-        throw new Error("Error Verifying the OTP");
+        return next(error);
     }
 });
 

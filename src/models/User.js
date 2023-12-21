@@ -136,10 +136,14 @@ function validateConfirmPassword(cfrm) {
 
 userSchema.pre("save", async function (next) {
   //hashing the password before saving it to database
-  if (!this.isModified || this.passwordReset) {
+  if (!this.isModified || this.passwordReset ) {
     // pre means before
     next();
   }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  this.confirmPassword = undefined;
+  
   const existingUser = await UserModel.findOne({
     $or: [{ email: this.email }, { voterId: this.voterId }],
   });
@@ -150,9 +154,7 @@ userSchema.pre("save", async function (next) {
     const error = new Error(message);
     return next(error);
   }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  this.confirmPassword = undefined;
+
 });
 
 userSchema.virtual("age").get(function () {
