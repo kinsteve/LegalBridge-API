@@ -116,7 +116,7 @@ const userSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpires: Date,
-    passwordReset: {
+    isRegister: {
       type:Boolean ,
       default:false
     }
@@ -136,17 +136,21 @@ function validateConfirmPassword(cfrm) {
 
 userSchema.pre("save", async function (next) {
   //hashing the password before saving it to database
-  if (!this.isModified || this.passwordReset ) {
+  if (!this.isModified('password')) {
     // pre means before
-    next();
+    return next();
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
+  console.log(this.passwordResetToken);
+
   
+  if(this.isRegister){
   const existingUser = await UserModel.findOne({
     $or: [{ email: this.email }, { voterId: this.voterId }],
   });
+
 
   if (existingUser) {
     const field = existingUser.email === this.email ? "Email" : "VoterId";
@@ -154,7 +158,9 @@ userSchema.pre("save", async function (next) {
     const error = new Error(message);
     return next(error);
   }
-
+  this.isRegister = false;
+}
+  next()
 });
 
 userSchema.virtual("age").get(function () {

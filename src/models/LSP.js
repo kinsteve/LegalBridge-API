@@ -9,11 +9,11 @@ const LSPAddressSchema = new mongoose.Schema({
   },
   state: {
     type: String,
-    required: [true, "State is Required"],
+    // required: [true, "State is Required"],
   },
   pincode: {
     type: Number,
-    required: true,
+    // required: true,
     validate: {
       validator: function (v) {
         // Validates whether 'v' is a 6-digit number
@@ -118,7 +118,7 @@ const LSPSchema = new mongoose.Schema({
     type: String,
     enum: ["advocate", "document writer", "arbitrators", "notaries", "mediators"],
     required: [true, "Type of LSP is required"],
-    default: 'Lawyer'
+    default: 'advocate'
   },
   experience: {
     type: Number,

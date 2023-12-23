@@ -91,6 +91,7 @@ derivedDataPath
 
 #Documentation
 documentaion
+lspData.json
 
 # End of https://www.gitignore.io/api/node
 
