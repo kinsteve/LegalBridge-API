@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import '../../lspData.json'assert { type: 'json' };
+// import '../../lspData.json'assert { type: 'json' };
 // const lspsData = require('./lspsData.json');
 
 

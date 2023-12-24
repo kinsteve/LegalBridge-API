@@ -405,11 +405,12 @@ import twilio from 'twilio';
 import generateOTP from '../config/generateOTP.js';
 import otpModel from '../models/OtpSchema.js';
 import LSPModel from '../models/LSP.js';
-import { createWalletController } from './moneyControllers.js';
+// import { createWalletController } from './moneyControllers.js';
 
 
 const registerUser= asyncHandler(async (req,res,next)=>{
         try {
+            req.body.isRegister = true;
             const user= await UserModel.create(req.body);
             if(user){
                 // const walletCreationResponse = await createWalletController(req, res, next,user);
@@ -482,45 +483,54 @@ const registerLSP = asyncHandler(async (req,res,next)=>{
         }
 });
 
+
 const emailCheck = (Model) => asyncHandler(async (req, res,next) => {
     const { email,voterId } = req.body;
     const voterRegex =  /^[A-Z]{3}[0-9]{7}$/;
     // Regex pattern to check the email format
     const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-    try{
-        if (!emailRegex.test(email)) {
-            // If the provided email does not match the regex pattern
-            const error = new Error("Invalid Email format");
-            error.statusCode = 400;
-            throw(error);
-        }
-        if (!voterRegex.test(voterId)) {
-            // If the provided email does not match the regex pattern
-            const error = new Error("Invalid voterId format");
-            error.statusCode = 400;
-            throw(error);
-        }
-        const targetUserByEmail = await Model.findOne({ email });
-        const targetUserByVoterId = await Model.findOne({ voterId });
-   
-        if (targetUserByEmail || targetUserByVoterId) {
-            const error = new Error("This Email/VoterID is associated with another account.");
-            error.statusCode = 400;
-            throw(error);
-        } else {
-            res.status(200).json({ message: "Both Email and VoterId are unique."});
-        }
-    }catch(error){
-       return next(error)
+
+    if (!emailRegex.test(email)) {
+        // If the provided email does not match the regex pattern
+        res.status(400);
+        throw new Error("Invalid Email format");
     }
-   
+    if (!voterRegex.test(voterId)) {
+        // If the provided email does not match the regex pattern
+        res.status(400);
+        throw new Error("Invalid voterId format");
+    }
+    // const targetUser = await Model.findOne({ email });
+
+    // if (targetUser) {
+    //     // If the email is associated with another account
+    //     res.status(400);
+    //     throw new Error("This Email is associated with another account.");
+    // } else {
+    //     // If the email is valid and not associated with any account
+    //     res.status(200).json({ message: "Valid Email" });
+    // }
+    const targetUserByEmail = await Model.findOne({ email });
+    const targetUserByVoterId = await Model.findOne({ voterId });
+
+    if (targetUserByEmail) {
+        res.status(400);
+        throw new Error("This Email is associated with another account.");
+    }
+    else if(targetUserByVoterId){
+        res.status(400);
+        throw new Error("This VoterID is associated with another account.");
+    } 
+    else {
+        res.status(200).json({ message: "Both Email and VoterId are unique."});
+    }
 });
 
 const loginUser = asyncHandler(async (req, res,next) => {
     const { voterId, password } = req.body;
     try{
-        const user = await UserModel.findOne({ voterId });
-        if (user && (await user.matchPassword(password))) {
+    const user = await UserModel.findOne({ voterId });
+    if (user && (await user.matchPassword(password))) {
         res.status(200).json({
             _id: user._id,
             role: user.role,
@@ -597,7 +607,6 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
     const resetToken = await targetUser.getPasswordResetToken();
     console.log('Working', resetToken);
    
-    targetUser.passwordReset = true,
     await targetUser.save({ validateBeforeSave: false });
 
     let current = '';
@@ -608,8 +617,8 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
         current = 'lsp';
     }
     const resetUrl = `https://legal-bridge-api.onrender.com/api/v1/auth/resetPassword/${current}/${resetToken}`;
-    // const message = Below is the password reset link ${resetUrl};
-    const message =
+    // const message = `Below is the password reset link ${resetUrl}`;
+    const message = 
     `<!DOCTYPE html>
     <html lang="en">
    
@@ -685,7 +694,7 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
                 <p>If you didn't request this, you can safely ignore this email.</p>
                 <p>Thank you!</p>
             </div>
-        </div>
+          </div>
     </body>
    
     </html>
@@ -701,39 +710,32 @@ const forgotPassword = (Model) => asyncHandler(async (req, res) => {
         await targetUser.save({ validateBeforeSave: false });
         res.status(500)
         throw new Error('There was an error while sending an email');
-    }
+    }
 });
 
 const resetPassword = (Model) => asyncHandler(async (req, res,next) => {
     const token = req.params.token;
 
     // Replace 'User' with the specified model dynamically
-    try{
-        const targetUser = await Model.findOne({
-            passwordResetToken: token,
-            passwordResetTokenExpires: { $gt: Date.now() },
-        });
-   
-        if (!targetUser) {
-            const error = new Error('Token is invalid or has expired');
-            res.statusCode = 400;
-            throw(error);
-        }
-   
-        targetUser.password = req.body.password;
-        targetUser.confirmPassword = req.body.confirmPassword;
-        targetUser.passwordResetToken = undefined;
-        targetUser.passwordResetTokenExpires = undefined;
-        targetUser.passwordChangedAt = Date.now();
-        await targetUser.save();
-   
-        console.log('Password has been reseted');
-        res.status(200).json({ message: 'Password has been reseted' });
+    const targetUser = await Model.findOne({
+        passwordResetToken: token,
+        passwordResetTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!targetUser) {
+        res.status(400);
+        throw new Error('Token is invalid or has expired');
     }
-    catch(error){
-        return next(error);
-    }
- 
+
+    targetUser.password = req.body.password;
+    targetUser.confirmPassword = req.body.confirmPassword;
+    targetUser.passwordResetToken = undefined;
+    targetUser.passwordResetTokenExpires = undefined;
+    targetUser.passwordChangedAt = Date.now();
+    await targetUser.save();
+
+    console.log('Password has been reseted');
+    res.status(200).json({ message: 'Password has been reseted' });
 });
 
 //PHONE NUMBER VERIFICATION
@@ -754,7 +756,6 @@ const sendOTP = asyncHandler(async (req, res,next) => {
         expirationTime
     })
     await otpDocument.save();
-    try{
         await client.messages
         .create({
             body: `Your LegalBridge verification code is: ${otp}. This code will expire in 5 minutes.`,
@@ -765,18 +766,12 @@ const sendOTP = asyncHandler(async (req, res,next) => {
             res.status(200).json({ message: "OTP send Successfully." });
         })
         .catch((err) => {
-            console.log(err);
-            const error = new Error('Failed to send OTP');
-            res.statusCode= 500;
-            throw error;
+            res.status(500);
+            console.error(err);
+            throw new Error(`Failed to send OTP`);
         })
-    }
-    catch(error){
-        return next(error);
-    }
-   
 
-});
+    });
 
 const verifyOTP = asyncHandler(async (req, res,next) => {
     const { phoneNumber, userOTP } = req.body;
