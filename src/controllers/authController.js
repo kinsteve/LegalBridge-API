@@ -11,7 +11,7 @@ import LSPModel from '../models/LSP.js';
 
 const registerUser= asyncHandler(async (req,res,next)=>{
         try {
-            req.body.isRegister = true;   
+            // req.body.isRegister = true;   
             const { dob, ...otherFields } = req.body;
 
             const newDob = new Date(dob);
@@ -20,6 +20,7 @@ const registerUser= asyncHandler(async (req,res,next)=>{
             const updatedUserFields = {
               ...otherFields, // Keep other fields as they are
               dob: newDob,   // Set dob to the new date value
+              isRegister: true, 
             };
             const user= await UserModel.create(updatedUserFields);
             if(user){
