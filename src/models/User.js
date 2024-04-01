@@ -117,8 +117,8 @@ const userSchema = new mongoose.Schema(
     passwordResetToken: String,
     passwordResetTokenExpires: Date,
     isRegister: {
-      type:Boolean ,
-      default:false
+      type:Boolean,
+      default:false 
     }
   },
   { timestamps: true }
@@ -143,7 +143,6 @@ userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
-  console.log(this.passwordResetToken);
 
   
   if(this.isRegister){
@@ -159,7 +158,7 @@ userSchema.pre("save", async function (next) {
     error.statusCode = 400;
     return next(error);
   }
-  this.isRegister = false;
+  // this.isRegister = false;
 }
   next()
 });

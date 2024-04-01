@@ -6,27 +6,30 @@ import twilio from 'twilio';
 import generateOTP from '../config/generateOTP.js';
 import otpModel from '../models/OtpSchema.js';
 import LSPModel from '../models/LSP.js';
+import { FactorListInstance } from 'twilio/lib/rest/verify/v2/service/entity/factor.js';
+import { FieldValueListInstance } from 'twilio/lib/rest/autopilot/v1/assistant/fieldType/fieldValue.js';
 // import { createWalletController } from './moneyControllers.js';
 
 
 const registerUser= asyncHandler(async (req,res,next)=>{
         try {
-            req.body.isRegister = true;   
+            // req.body.isRegister = true;   
             const { dob, ...otherFields } = req.body;
 
             const newDob = new Date(dob);
-        
+            console.log(req.body , "ln18");
             // Create a new object with the updated dob
             const updatedUserFields = {
               ...otherFields, // Keep other fields as they are
               dob: newDob,   // Set dob to the new date value
             };
+            console.log(updatedUserFields);
             const user= await UserModel.create(updatedUserFields);
+
             if(user){
                 // const walletCreationResponse = await createWalletController(req, res, next,user);
                 // console.log(walletCreationResponse);
                 // const storedDob= new Date(user.dob);
-
                 res.status(201).json({
                     _id:user._id,
                     role:user.role,
