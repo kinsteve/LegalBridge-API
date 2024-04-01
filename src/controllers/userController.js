@@ -4,10 +4,19 @@ import LSP from '../models/LSP.js';
 import Booking from '../models/Booking.js';
 
 
-const profile = asyncHandler(async(req,res)=>{
-    const user = req.user; 
-    res.status(200).json(user);
-})
+const profile = asyncHandler(async (req, res, next) => {
+  try {
+      if (!req.user) {
+          const error = new Error("User not found");
+          error.statusCode = 404; // Status code for resource not found
+          throw error;
+      }
+      const user = req.user;
+      res.status(200).json(user);
+  } catch (error) {
+      return next(error);
+  }
+});
 
 function isValidTimeSlot(selectedTimeString, startTimeString, endTimeString) {
   console.log(selectedTimeString)
@@ -26,30 +35,45 @@ function isValidTimeSlot(selectedTimeString, startTimeString, endTimeString) {
   return true;
 }
 
-const updateUserDetails = asyncHandler(async (req, res) => {
-    const { id } = req.params; 
-    const updates = req.body; 
-    if ('password' in updates) {
+const updateUserDetails = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  if ('password' in updates) {
       delete updates.password;
-    }
-    try {
-      const updatedUser = await User.findByIdAndUpdate(id, { $set: updates }, {
-        new: true,
-        runValidators: true, 
+  }
+
+  try {
+      const existingUser = await User.findOne({
+          $or: [{ email: updates.email }, { voterId: updates.voterId }],
+          _id: { $ne: id } // Exclude the current user from the search
       });
-      console.log(updatedUser);
-      if (!updatedUser) {
-        res.status(404);
-        throw new Error("User not Found");
+
+      if (existingUser) {
+          const field = existingUser.email === updates.email ? "Email" : "VoterId";
+          const message = `${field} is already associated with some other account`;
+          const error = new Error(message);
+          error.statusCode = 400; // Bad Request
+          throw(error);
       }
 
-      res.status(200).json({...updatedUser._doc, message:"Details are saved successfully!"});
-    } catch (error) {
-      res.status(500);
-      console.log(error);
-      throw new Error("There is an error while updating the user details",error);
-    }
-  });
+      const updatedUser = await User.findByIdAndUpdate(id, { $set: updates }, {
+          new: true,
+          runValidators: true,
+      });
+
+      if (!updatedUser) {
+          const error = new Error('User not found');
+          error.statusCode = 404; // Not Found
+          throw(error);
+      }
+
+      res.status(200).json({ ...updatedUser._doc, message: "Details are saved successfully!" });
+  } catch (error) {
+     return next(error);
+  }
+});
+
 
   const bookingSlot = asyncHandler(async(req,res)=>{
     try {

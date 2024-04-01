@@ -4,12 +4,12 @@ const BookingSchema = new mongoose.Schema({
     userId: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'UserModel', 
-        required: true,
+        // required: true,
         },
-    appointmentDate: {
-        type: Date,
-        required: true 
-    },
+    // appointmentDate: {
+    //     type: Date,
+    //     required: true 
+    // },
     lspId: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'LSPModel', 
@@ -19,7 +19,7 @@ const BookingSchema = new mongoose.Schema({
         type: Date,
         required: true
     }
-    }
+   }
 );
 
 const BookingModel = mongoose.model('Booking', BookingSchema);

@@ -156,6 +156,7 @@ userSchema.pre("save", async function (next) {
     const field = existingUser.email === this.email ? "Email" : "VoterId";
     const message = `${field} is already registered.`;
     const error = new Error(message);
+    error.statusCode = 400;
     return next(error);
   }
   this.isRegister = false;

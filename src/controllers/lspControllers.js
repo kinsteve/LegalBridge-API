@@ -4,25 +4,27 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import '../../lspData.json'assert { type: 'json' };
+// import '../../lspData.json'assert { type: 'json' };
 // const lspsData = require('./lspsData.json');
 
 
-const getAllDetails = asyncHandler( async (req, res) => {
-    try {
+const getAllDetails = asyncHandler(async (req, res, next) => {
+  try {
       const allLSPs = await LSPModel.find(); // Fetch all LSPs from the database
-      
+
       if (allLSPs.length === 0) {
-        return res.status(404).json({ message: 'No LSPs found' });
+          const error = new Error('No LSPs found');
+          error.statusCode = 404;
+          throw error;
       }
-  
+
       res.status(200).json(allLSPs); // Send the retrieved LSPs as JSON response
-    } catch (error) {
+  } catch (error) {
       // Handle errors
       console.error('Error fetching LSPs:', error);
-      res.status(500).json({ message: 'Error Fetching LSPs Details' });
-    }
-  });
+      return next(error);
+  }
+});
 
   const getLSPByName = asyncHandler(async (req, res,next) => {
     const { names } = req.body;

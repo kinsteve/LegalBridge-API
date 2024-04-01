@@ -61,6 +61,7 @@ const LSPSchema = new mongoose.Schema({
     type: String,
     required: [true, "Email is Required"],
     unique: true,
+    
     lowercase: true,
     match: [
       /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
