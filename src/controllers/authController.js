@@ -118,7 +118,7 @@ const emailCheck = (Model) => asyncHandler(async (req, res, next) => {
         }
 
         const targetUserByEmail = await Model.findOne({ email });
-        const targetUserByVoterId= undefined;
+        let targetUserByVoterId = undefined;
         if(Model!=LSPModel)
         { targetUserByVoterId = await Model.findOne({ voterId });}
 
