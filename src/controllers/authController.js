@@ -111,14 +111,16 @@ const emailCheck = (Model) => asyncHandler(async (req, res, next) => {
             throw error;
         }
 
-        if (!voterRegex.test(voterId)) {
+        if (Model!=LSPModel && !voterRegex.test(voterId)) {
             const error = new Error("Invalid voterId format");
             error.statusCode = 400;
             throw error;
         }
 
         const targetUserByEmail = await Model.findOne({ email });
-        const targetUserByVoterId = await Model.findOne({ voterId });
+        const targetUserByVoterId= undefined;
+        if(Model!=LSPModel)
+        { targetUserByVoterId = await Model.findOne({ voterId });}
 
         if (targetUserByEmail) {
             const error = new Error("This Email is associated with another account.");
@@ -128,7 +130,9 @@ const emailCheck = (Model) => asyncHandler(async (req, res, next) => {
             const error = new Error("This VoterId is associated with another account.");
             error.statusCode = 400;
             throw error;
-        } else {
+        } else if(Model==LSPModel){
+            res.status(200).json({ message: "Email is unique." });
+        }else{
             res.status(200).json({ message: "Both Email and VoterId are unique." });
         }
     } catch (error) {
