@@ -83,22 +83,25 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
         error.statusCode(404);
         throw(error);
       }
-
+  
       const timeZone = 'Asia/Kolkata'; // GMT+5:30
-
-    const slots = lsp.slots.map(slot => ({
-      _id:slot._id,
-      startTime: convertToTimeZone(slot.startTime, timeZone),
-      endTime: convertToTimeZone(slot.endTime, timeZone),
-      isBooked: slot.isBooked
-    }));
-
-      // const availableSlots = lsp.slots.filter(slot => !slot.isBooked);
-      res.status(200).json(slots);
+  
+      const convertedSlots = [];
+      for (const daySlots of lsp.slots) {
+        const slots = daySlots.map(slot => ({
+          _id: slot._id,
+          startTime: convertToTimeZone(slot.startTime, timeZone),
+          endTime: convertToTimeZone(slot.endTime, timeZone),
+          isBooked: slot.isBooked
+        }));
+        convertedSlots.push(slots);
+      }
+  
+      res.status(200).json(convertedSlots);
     } catch (error) {
       return next(error);
     }
-  })
+  });
 
   export {
        getAllDetails,
