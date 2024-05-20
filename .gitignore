@@ -88,6 +88,8 @@ derivedDataPath
 
 #enviornment files
 .env
+.env.development 
+.env.production
 
 #Documentation
 documentaion
