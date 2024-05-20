@@ -174,7 +174,7 @@ const LSPSchema = new mongoose.Schema({
     type: String,
     default: "18:00", // Default end time 6:00 PM
   },
-  slots: [slotSchema],
+  slots: [[slotSchema]],
   
   confirmPassword: {
     type: String,
@@ -247,36 +247,46 @@ LSPSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-function generateTimeSlots(startTime, endTime) {
-  const slots = [];
-  const createTime = (timeStr) => {
+function generateTimeSlots(startTime, endTime, days = 1) {
+  const slotsArray = [];
+
+  const createTime = (timeStr, date) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
-    const now = new Date();
-    now.setHours(hours, minutes, 0, 0);
-    return now;
+    const newDate = new Date(date);
+    newDate.setHours(hours, minutes, 0, 0);
+    return newDate;
   };
 
-  const start = createTime(startTime);
-  const end = createTime(endTime);
-  console.log(start , end);
+  let currentDate = new Date();
 
-  while (start < end) {
-    const slotEnd = new Date(start);
-    slotEnd.setHours(slotEnd.getHours() + 1);
+  for (let i = 0; i < days; i++) {
+    const slots = [];
+    const start = createTime(startTime, currentDate);
+    const end = createTime(endTime, currentDate);
 
-    if (slotEnd > end) break;
+    let currentTime = new Date(start);
 
-    slots.push({ startTime: new Date(start), endTime: slotEnd, isBooked: false });
-    start.setHours(start.getHours() + 1);
+    while (currentTime < end) {
+      const slotEnd = new Date(currentTime);
+      slotEnd.setHours(slotEnd.getHours() + 1);
+
+      if (slotEnd > end) break;
+
+      slots.push({ startTime: new Date(currentTime), endTime: slotEnd, isBooked: false });
+      currentTime.setHours(currentTime.getHours() + 1);
+    }
+
+    slotsArray.push(slots);
+    currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return slots;
+  return slotsArray;
 }
 
 
 LSPSchema.pre('save', function (next) {
   if (this.isModified('startTime') || this.isModified('endTime')) {
-    this.slots = generateTimeSlots(this.startTime, this.endTime);
+    this.slots = generateTimeSlots(this.startTime, this.endTime , 7);
   }
   next();
 });

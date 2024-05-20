@@ -88,6 +88,7 @@ const registerLSP = asyncHandler(async (req,res,next)=>{
                     location:lsp.location,
                     geoLocation:lsp.geoLocation,
                     education:lsp.education,
+                    slots:lsp.slots,
                     token: generateToken(lsp._id),
                     message: "LSP registered Successfully"
                 });
