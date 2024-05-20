@@ -1,7 +1,8 @@
 import asyncHandler from  'express-async-handler';
 import User from '../models/User.js';
 import LSP from '../models/LSP.js';
-import Booking from '../models/Booking.js';
+import LSPModel from '../models/LSP.js';
+import UserModel from '../models/User.js';
 
 
 const profile = asyncHandler(async (req, res, next) => {
@@ -18,22 +19,22 @@ const profile = asyncHandler(async (req, res, next) => {
   }
 });
 
-function isValidTimeSlot(selectedTimeString, startTimeString, endTimeString) {
-  console.log(selectedTimeString)
-  console.log(startTimeString);
-  console.log(endTimeString);
-  const selectedTime = new Date(selectedTimeString);
-  // const startTime = new Date(startTimeString);
-  // const endTime = new Date(endTimeString);
-  console.log(selectedTime);
-  // console.log(startTime);
-  // console.log(endTime);
-  if (selectedTime >= startTime && selectedTime <= endTime) {
-    console.log("Selected time is within the LSP's availability.");
-    return false;
-  }
-  return true;
-}
+// function isValidTimeSlot(selectedTimeString, startTimeString, endTimeString) {
+//   console.log(selectedTimeString)
+//   console.log(startTimeString);
+//   console.log(endTimeString);
+//   const selectedTime = new Date(selectedTimeString);
+//   // const startTime = new Date(startTimeString);
+//   // const endTime = new Date(endTimeString);
+//   console.log(selectedTime);
+//   // console.log(startTime);
+//   // console.log(endTime);
+//   if (selectedTime >= startTime && selectedTime <= endTime) {
+//     console.log("Selected time is within the LSP's availability.");
+//     return false;
+//   }
+//   return true;
+// }
 
 const updateUserDetails = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
@@ -75,37 +76,57 @@ const updateUserDetails = asyncHandler(async (req, res, next) => {
 });
 
 
-  const bookingSlot = asyncHandler(async(req,res)=>{
+  const bookingSlot = asyncHandler(async(req,res,next)=>{
     try {
-      const { userId, lspId, appointmentDate, selectedTime } = req.body;
-      const user = await User.findById(userId);
-      if (!user) {
-          res.status(404)
-          throw new Error("User not found!!");
+      const { lspId, slotId } = req.params;
+      const { userId } = req.body;
+  
+      const lsp = await LSPModel.findById(lspId);
+      if (!lsp)
+      {
+        const error= new Error('LSP not found');
+        error.statusCode(404);
+        throw(error);
       }
-      const lsp = await LSP.findById(lspId);
-      if (!lsp) {
-          res.status(404)
-          throw new Error("LSP not found!!");
+      const slot = lsp.slots.id(slotId);
+      if (!slot || slot.isBooked) 
+        {
+          const error= new Error('Slot is already booked');
+          error.statusCode=404;
+          throw(error);
+        }
+      
+      slot.isBooked = true;
+      await lsp.save({validateBeforeSave: false});
+  
+      const user = await UserModel.findById(userId);
+      if (user) {
+        user.bookedSlots = user.bookedSlots || [];
+        user.bookedSlots.push({ lspId: lspId, slot: slotId });
+        await user.save({validateBeforeSave: false});
       }
+  
+      res.status(200).send('Slot booked successfully');
+    } catch (error) {
+      return next(error);
+    }
+  })
 
-      if (isValidTimeSlot(selectedTime, lsp.startTime, lsp.endTime)) {
-         
-        // res.status(400)
-          // throw new Error("Invalid time slot selected");
+  const findBookedSlots=asyncHandler(async(req,res,next)=>{
+    try {
+      const { userId } = req.params;
+      // const user = await UserModel.findById(userId).populate('bookedSlots.lspId');
+      const user = await UserModel.findById(userId)
+      if (!user) 
+      {
+        const error= new Error('User not found');
+        error.statusCode(404);
+        throw(error);
       }
-      const booking = await Booking.create({
-          userId,
-          lspId,
-          appointmentDate,
-          selectedTime,
-      });
-
-      res.status(201).json({...booking._doc,message:"Slot booked successfully"});
-  } catch (error) {
-      res.status(500)
-      throw new Error("Internal Server Errror",error.message);
-  }
+      res.status(200).json(user.bookedSlots);
+    } catch (error) {
+      return next(error);
+    }
   })
   
 
@@ -135,5 +156,6 @@ export {
     profile,
     updateUserDetails,
     bookingSlot,
-    findNearestLSPsToUser
+    findNearestLSPsToUser,
+    findBookedSlots
 }

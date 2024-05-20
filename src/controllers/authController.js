@@ -82,6 +82,8 @@ const registerLSP = asyncHandler(async (req,res,next)=>{
                     experience:lsp.experience,
                     expertiseFeild:lsp.expertiseField,
                     courts:lsp.courts,
+                    languages:lsp.languages,
+                    bio: lsp.bio,
                     rating:lsp.rating,
                     location:lsp.location,
                     geoLocation:lsp.geoLocation,

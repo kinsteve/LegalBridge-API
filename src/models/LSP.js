@@ -52,6 +52,12 @@ const LSPEducationSchema = new mongoose.Schema({
 
 });
 
+const slotSchema = new mongoose.Schema({
+  startTime: { type: Date, required: true },
+  endTime: { type: Date, required: true },
+  isBooked: { type: Boolean, default: false }
+});
+
 const LSPSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -161,13 +167,14 @@ const LSPSchema = new mongoose.Schema({
   },
   education: [LSPEducationSchema],
   startTime: {
-    type: Date,
-    default: new Date().setHours(0, 0, 0, 0), // Default value 00:00
+    type: String,
+    default: "09:00", // Default start time 9:00 AM
   },
   endTime: {
-    type: Date,
-    default: new Date().setHours(23, 59, 59, 999), // Default value 23:59
+    type: String,
+    default: "18:00", // Default end time 6:00 PM
   },
+  slots: [slotSchema],
   
   confirmPassword: {
     type: String,
@@ -239,6 +246,42 @@ LSPSchema.methods.getPasswordResetToken = async function () {
 LSPSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+function generateTimeSlots(startTime, endTime) {
+  const slots = [];
+  const createTime = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const now = new Date();
+    now.setHours(hours, minutes, 0, 0);
+    return now;
+  };
+
+  const start = createTime(startTime);
+  const end = createTime(endTime);
+  console.log(start , end);
+
+  while (start < end) {
+    const slotEnd = new Date(start);
+    slotEnd.setHours(slotEnd.getHours() + 1);
+
+    if (slotEnd > end) break;
+
+    slots.push({ startTime: new Date(start), endTime: slotEnd, isBooked: false });
+    start.setHours(start.getHours() + 1);
+  }
+
+  return slots;
+}
+
+
+LSPSchema.pre('save', function (next) {
+  if (this.isModified('startTime') || this.isModified('endTime')) {
+    this.slots = generateTimeSlots(this.startTime, this.endTime);
+  }
+  next();
+});
+
+
 
 
 const LSPModel = mongoose.model('LSP', LSPSchema);

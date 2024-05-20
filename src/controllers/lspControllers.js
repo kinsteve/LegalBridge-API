@@ -3,6 +3,7 @@ import LSPModel from "../models/LSP.js";
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import moment from "moment-timezone";
 
 // import '../../lspData.json'assert { type: 'json' };
 // const lspsData = require('./lspsData.json');
@@ -30,21 +31,21 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
     const { names } = req.body;
   
     if (!names || !Array.isArray(names) || names.length === 0) {
-      const error = new Error('Please provide an array of lawyer names.')
+      const error = new Error('Please provide an array of lsp names.')
       error.statusCode(400);
       throw(error);
     }
   
     try {
-      const lawyers = await LawyerModel.find({ name: { $in: names } });
+      const lsps = await LSPModel.find({ name: { $in: names } });
   
-      if (lawyers.length === 0) {
-        const error = new Error('No lawyers found with the provided names.')
+      if (lsps.length === 0) {
+        const error = new Error('No lsp found with the provided names.')
         error.statusCode(404);
         throw(error);
       }
   
-      res.status(200).json(lawyers);
+      res.status(200).json(lsps);
     } catch (error) {  
         return next(error);
     }
@@ -69,7 +70,38 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
   // } 
   // })
 
+  const convertToTimeZone = (date, timeZone) => {
+    return moment(date).tz(timeZone).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+  };
+
+  const getSlotsById = asyncHandler(async(req,res,next)=>{
+    try {
+      const lspId = req.params.id;
+      const lsp = await LSPModel.findById(lspId);
+      if (!lsp) {
+        const error = new Error('LSP not found')
+        error.statusCode(404);
+        throw(error);
+      }
+
+      const timeZone = 'Asia/Kolkata'; // GMT+5:30
+
+    const slots = lsp.slots.map(slot => ({
+      _id:slot._id,
+      startTime: convertToTimeZone(slot.startTime, timeZone),
+      endTime: convertToTimeZone(slot.endTime, timeZone),
+      isBooked: slot.isBooked
+    }));
+
+      // const availableSlots = lsp.slots.filter(slot => !slot.isBooked);
+      res.status(200).json(slots);
+    } catch (error) {
+      return next(error);
+    }
+  })
+
   export {
        getAllDetails,
-       getLSPByName
+       getLSPByName,
+       getSlotsById
   }

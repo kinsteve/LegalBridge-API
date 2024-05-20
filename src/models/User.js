@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import crypto from "crypto";
+import { type } from "os";
+import { ObjectId } from "mongodb";
+import LSPModel from "./LSP.js";
 
 const UserAddressSchema = new mongoose.Schema({
   city: {
@@ -35,6 +38,17 @@ const geoLocationSchema = new mongoose.Schema({
     required: true
   }
 });
+
+const slotSchema = new mongoose.Schema({
+  lspId:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'LSPModel',
+    unique:true,
+  },
+  slot: { type: mongoose.Schema.Types.ObjectId, required: true },
+  bookedAt: { type: Date, default: Date.now }
+});
+
 
 const userSchema = new mongoose.Schema(
   {
@@ -107,6 +121,7 @@ const userSchema = new mongoose.Schema(
     },
     address: UserAddressSchema,
     geoLocation: geoLocationSchema,
+    bookedSlots:[slotSchema],
     confirmPassword: {
       type: String,
       // required:[true,'Confirm Password is required'],
