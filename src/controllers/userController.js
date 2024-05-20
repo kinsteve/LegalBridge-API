@@ -85,7 +85,7 @@ const updateUserDetails = asyncHandler(async (req, res, next) => {
       if (!lsp)
       {
         const error= new Error('LSP not found');
-        error.statusCode(404);
+        error.statusCode= 404;
         throw(error);
       }
       const slot = lsp.slots.map(slotArray => slotArray.find(slot => slot._id.toString() === slotId)).find(Boolean);
