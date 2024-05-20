@@ -88,7 +88,7 @@ const updateUserDetails = asyncHandler(async (req, res, next) => {
         error.statusCode(404);
         throw(error);
       }
-      const slot = lsp.slots.id(slotId);
+      const slot = lsp.slots.map(slotArray => slotArray.find(slot => slot._id.toString() === slotId)).find(Boolean);
       if (!slot || slot.isBooked) 
         {
           const error= new Error('Slot is already booked');
@@ -115,8 +115,8 @@ const updateUserDetails = asyncHandler(async (req, res, next) => {
   const findBookedSlots=asyncHandler(async(req,res,next)=>{
     try {
       const { userId } = req.params;
-      // const user = await UserModel.findById(userId).populate('bookedSlots.lspId');
-      const user = await UserModel.findById(userId)
+      const user = await UserModel.findById(userId).populate({path:'bookedSlots.lspId',model:LSPModel});
+      // const user = await UserModel.findById(userId)
       if (!user) 
       {
         const error= new Error('User not found');

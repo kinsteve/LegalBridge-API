@@ -103,8 +103,29 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
     }
   });
 
+  const getBookedClients = asyncHandler(async(req,res,next)=>{
+    try{
+      const lspId = req.params.id;
+
+      // Find the LSP by lspId
+      const lsp = await LSPModel.findById(lspId);
+  
+      if (!lsp) {
+        const error = new Error("LSP not found");
+        error.statusCode = 404;
+        throw(error);
+      }
+      const bookedClients = await UserModel.find({ 'bookedSlots.lspId': lspId });
+
+      res.status(200).json(bookedClients);
+    }catch(error){
+      return next(error);
+    }
+  })
+
   export {
        getAllDetails,
        getLSPByName,
-       getSlotsById
+       getSlotsById,
+       getBookedClients
   }
