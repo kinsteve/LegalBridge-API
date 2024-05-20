@@ -106,7 +106,7 @@ const updateUserDetails = asyncHandler(async (req, res, next) => {
         await user.save({validateBeforeSave: false});
       }
   
-      res.status(200).send('Slot booked successfully');
+      res.status(200).json({message: 'Slot booked successfully'});
     } catch (error) {
       return next(error);
     }
