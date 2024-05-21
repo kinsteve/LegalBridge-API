@@ -117,6 +117,7 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
         throw(error);
       }
       const bookedClients = await UserModel.find({ 'bookedSlots.lspId': lspId }).lean(); // Use lean() for faster queries
+      const timeZone = 'Asia/Kolkata'; // GMT+5:30
       const result = bookedClients.map(client => {
         // Find the booked slot for this LSP in the client's bookedSlots
         const bookedSlot = client.bookedSlots.find(slot => slot.lspId.toString() === lspId.toString());
@@ -127,7 +128,7 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
             slotDetails = slotArray.find(slot => slot._id.toString() === bookedSlot.slot.toString());
             if (slotDetails) break;
         }
-
+         
         // Return combined client and slot information
         return {
             client,
