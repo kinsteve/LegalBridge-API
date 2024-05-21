@@ -22,6 +22,7 @@ authRoutes
 .get('/resetPassword/lsp/:token', (req, res) => {
     res.render('passwordReset'); 
   })
+  // dummy comment
 .get('/message',(req,res)=>{
     res.render('message')
   })
