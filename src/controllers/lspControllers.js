@@ -131,11 +131,16 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
         // Return combined client and slot information
         return {
             client,
-            slot: slotDetails
+            slot: {
+              _id: slotDetails._id,
+              startTime: convertToTimeZone(slotDetails.startTime, timeZone),
+              endTime: convertToTimeZone(slotDetails.endTime, timeZone),
+              isBooked: slotDetails.isBooked
+            }
         };
     });
 
-    res.status(200).json(result);
+    res.status(200).json(result); 
 } catch (error) {
     return next(error);
 }
