@@ -178,6 +178,7 @@ const loginLSP = asyncHandler(async (req, res,next) => {
     const { email, password } = req.body;
     try{
         const lsp = await LSPModel.findOne({ email });
+        console.log(lsp);
         if (lsp && (await lsp.matchPassword(password))) {
         res.status(200).json({
             _id: lsp._id,

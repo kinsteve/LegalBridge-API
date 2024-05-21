@@ -200,7 +200,7 @@ function validateConfirmPassword(cfrm) {
 
 LSPSchema.pre("save", async function (next) {
   //hashing the password before saving it to database
-  if (!this.isModified) {
+  if (!this.isModified('password')) {
     // pre means before
     next();
   }

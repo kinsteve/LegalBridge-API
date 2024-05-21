@@ -9,7 +9,7 @@ lspRoutes
 .get('/',protect,getAllDetails)
 .post('/getLSPByName' ,protect, getLSPByName)
 .get('/:id/slots',protect, getSlotsById)
-.get('/:id/getBookedClients',protect,restrictTo("lsp","admin"),getBookedClients)
+.get('/:id/getBookedClients',protect,restrictTo('lsp','admin'),getBookedClients)
 // .get('/insertAllLSPs', protect, insertAllLSPs)
 
 export default lspRoutes;

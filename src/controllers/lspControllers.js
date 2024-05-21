@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import moment from "moment-timezone";
+import UserModel from "../models/User.js";
 
 // import '../../lspData.json'assert { type: 'json' };
 // const lspsData = require('./lspsData.json');
@@ -115,13 +116,30 @@ const getAllDetails = asyncHandler(async (req, res, next) => {
         error.statusCode = 404;
         throw(error);
       }
-      const bookedClients = await UserModel.find({ 'bookedSlots.lspId': lspId });
+      const bookedClients = await UserModel.find({ 'bookedSlots.lspId': lspId }).lean(); // Use lean() for faster queries
+      const result = bookedClients.map(client => {
+        // Find the booked slot for this LSP in the client's bookedSlots
+        const bookedSlot = client.bookedSlots.find(slot => slot.lspId.toString() === lspId.toString());
+        
+        // Find the slot details from the LSP's slot array
+        let slotDetails;
+        for (const slotArray of lsp.slots) {
+            slotDetails = slotArray.find(slot => slot._id.toString() === bookedSlot.slot.toString());
+            if (slotDetails) break;
+        }
 
-      res.status(200).json(bookedClients);
-    }catch(error){
-      return next(error);
-    }
-  })
+        // Return combined client and slot information
+        return {
+            client,
+            slot: slotDetails
+        };
+    });
+
+    res.status(200).json(result);
+} catch (error) {
+    return next(error);
+}
+});
 
   export {
        getAllDetails,
