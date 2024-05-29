@@ -123,7 +123,8 @@ const updateUserDetails = asyncHandler(async (req, res, next) => {
         error.statusCode= 404;
         throw(error);
       }
-      res.status(200).json(user.bookedSlots.lspId);
+      // console.log(user.bookedSlots);
+      res.status(200).json(user.bookedSlots);
     } catch (error) {
       return next(error);
     }
