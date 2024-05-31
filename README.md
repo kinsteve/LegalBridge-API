@@ -63,6 +63,8 @@ The figure demonstrates the flow diagram of the recommendation model.
 Overview:
 LegalBridge is a comprehensive online platform that connects individuals in need of legal services (referred to as "clients") with qualified legal professionals (known as "Legal Service Providers" or LSPs). The platform aims to make the process of finding, consulting, and obtaining legal advice and services more accessible, efficient, and secure.
 
+Live Deployed Link : https://legal-bridge-api.onrender.com
+
 Key Features:
 
 ✅ Client-LSP Matchmaking: LegalBridge employs a sophisticated machine learning recommendation system that matches clients with the most suitable LSPs. This matchmaking process takes into account parameters like ratings, domain expertise, locality, and cost estimation.
